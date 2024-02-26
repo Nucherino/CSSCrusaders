@@ -1,3 +1,4 @@
-p1 {
-    text-shadow: 0cap;
+h1::first-letter{
+  font-size: 2rem;
+  color:#ff8A00;
 }
