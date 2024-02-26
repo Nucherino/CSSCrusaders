@@ -19,7 +19,7 @@ def styles():
 def retrieve_image(): #* retrieve images
     with open("/public/image/readme.jpg", "rb") as file:
         readBytes = file.read()
-    return make_response(readBytes, "HTTP/1.1 200 OK", [("Content-Type", "image/jpeg"), ("X-Content-Type-Options", "nosniff")])
+    return make_response(readBytes, "HTTP/1.1 200 OK", [("Content-Type", "image/jpg"), ("X-Content-Type-Options", "nosniff")])
 
 @app.errorhandler(404)
 def page_not_found(error):
