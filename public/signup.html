@@ -1,0 +1,48 @@
+<html lang="en">
+  <head>
+    <title>CSSCrusaders Project</title>
+    <link rel="stylesheet" type="text/css" href="/public/styles.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="/public/favicon.ico" />
+  </head>
+
+  <div class="title">
+    <h2>CSE312 CSSCrusaders Project</h2>
+  </div>
+
+  <div class="header">
+    <div class="image_div">
+      <img src="/public/image/readme.jpg" alt="SQUIDWARD" />
+    </div>
+    <div class="welcome-div">
+      <p id="paragraph">Please register here!</p>
+    </div>
+  </div>
+
+  <a href="/login">Go back to login</a>
+  <br />
+
+  Register:
+  <form
+    action="/register"
+    method="post"
+    enctype="application/x-www-form-urlencoded"
+  >
+    <label
+      >Username:
+      <input id="reg-form-username" type="text" name="username" />
+    </label>
+    <br />
+    <label
+      >Password:&nbsp;
+      <input id="reg-form-pass" type="password" name="password" />
+    </label>
+    <br />
+    <label
+      >Repeat Password:&nbsp;
+      <input id="reg-form-pass" type="password" name="passwordCheck" />
+    </label>
+    <input type="submit" value="Post" />
+    <br />
+    <p id="error-message" name="error">{{error}}</p>
+  </form>
+</html>
