@@ -1,12 +1,8 @@
-from flask import Flask, request, make_response, redirect, render_template, flask_bcrypt
-from pymongo import MongoClient
+from flask import Flask, request, make_response, redirect, render_template
+from database import user_login
 from userClass import User
 
-mongo_client = MongoClient("mongo")
-db = mongo_client["cse312"]
-user_login = db["user_login"]
 app = Flask(__name__, template_folder='public')
-
 
 # * -------------------------- GET REQUESTS ------------------------------
 
