@@ -12,9 +12,8 @@ class User:
             "_id": uuid.uuid4().hex,
             "username": username,
             "password": password,
-            "hash": pbkdf2_sha256.hash()
         }
-        user["password"] = pbkdf2_sha256.using(rounds=8000, salt_size=10).hash(user["password"])
+        user["password"] = pbkdf2_sha256.encrypt(user["password"])
         if user_login.find_one({"username", user["username"]}):
             return jsonify({"Error": "Username already exists"}), 400
         user_login.insert_one(user)
