@@ -1,5 +1,10 @@
-from flask import Flask, request, make_response, redirect, render_template
+from flask import Flask, request, make_response, redirect, render_template, flask_bcrypt
+from pymongo import MongoClient
+from userClass import User
 
+mongo_client = MongoClient("mongo")
+db = mongo_client["cse312"]
+user_login = db["user_login"]
 app = Flask(__name__, template_folder='public')
 
 
@@ -59,13 +64,8 @@ def handleSignUp():
     password = request.form.get('password')
     passwordCheck = request.form.get('passwordCheck')
 
-    # TODO: check if username in database
-
     # TODO: placeholder code
-    '''
-    if username in "database":
-        return "<h1>Username already taken.</h1>"
-    '''
+
     if password != passwordCheck:
         return render_template("signup.html", error="Passwords are not the same")
     elif not password and not passwordCheck:
@@ -75,7 +75,8 @@ def handleSignUp():
     elif not passwordCheck:
         return render_template("signup.html", error="Repeated password missing")
     else:
-        # TODO: put salted hash of password into database
+        user = User()
+        User.signup(user, username, password)
         # TODO: create auth token, store hashed auth token in database
 
         response = make_response(redirect("/", code=302))
