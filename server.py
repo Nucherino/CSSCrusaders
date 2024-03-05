@@ -9,24 +9,39 @@ app = Flask(__name__, template_folder='public')
 @app.route("/", methods=["GET"])
 @app.route("/public/index.html", methods=["GET"])
 def home():
+    user = User()
+    if "authtoken" not in request.cookies:
+        return make_response(redirect("/login", code = 401))
+    else:
+        token = request.cookies["authtoken"]
+        find_user = user.find({"authtoken": token})
+        if find_user == None:
+            return make_response(redirect("/login", code=401))
     with open("/public/index.html", "rb") as file:
         readBytes = file.read()
-    return make_response(readBytes, "HTTP/1.1 200 OK",
+    return make_response(readBytes,
                          [("Content-Type", "text/html"), ("X-Content-Type-Options", "nosniff")])
+
+@app.route("/public/favicon.ico", methods=["GET"])
+def icon():
+    with open("/public/favicon.ico", "rb") as file:
+        readBytes = file.read()
+    return make_response(readBytes,
+                         [("Content-Type", "image/x-icon"), ("X-Content-Type-Options", "nosniff")])
 
 
 @app.route("/public/app.js", methods=["GET"])
 def javascriptCode():
     with open("/public/app.js", "rb") as file:
         readBytes = file.read()
-    return make_response(readBytes, "HTTP/1.1 200 OK",
+    return make_response(readBytes,
                          [("Content-Type", "text/javascript"), ("X-Content-Type-Options", "nosniff")])
 
 
 @app.route("/signup")
 def signup():
     readBytes = render_template("signup.html", error="")
-    return make_response(readBytes, "HTTP/1.1 200 OK",
+    return make_response(readBytes,
                          [("Content-Type", "text/html"), ("X-Content-Type-Options", "nosniff")])
 
 
@@ -34,7 +49,7 @@ def signup():
 def styles():
     with open("/public/styles.css", "rb") as file:
         readBytes = file.read()
-    return make_response(readBytes, "HTTP/1.1 200 OK",
+    return make_response(readBytes,
                          [("Content-Type", "text/css"), ("X-Content-Type-Options", "nosniff")])
 
 
@@ -42,7 +57,7 @@ def styles():
 def retrieve_image():  # * retrieve images
     with open("/public/image/readme.jpg", "rb") as file:
         readBytes = file.read()
-    return make_response(readBytes, "HTTP/1.1 200 OK",
+    return make_response(readBytes,
                          [("Content-Type", "image/jpg"), ("X-Content-Type-Options", "nosniff")])
 
 
