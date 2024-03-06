@@ -1,7 +1,7 @@
 from flask import Flask, request, make_response, redirect, render_template, Response
 from database import user_login
 from userClass import User
-import mimetypes
+import mimetypes, hashlib
 
 mimetypes.add_type('text/css', '.css')
 mimetypes.add_type('text/javascript', '.js')
@@ -13,18 +13,22 @@ app = Flask(__name__, template_folder='public')
 @app.route("/", methods=["GET"])
 @app.route("/public/index.html", methods=["GET"])
 def home():
-    user = User()
-    if "authtoken" not in request.cookies:
-        return make_response(redirect("/login", code = 401))
+    if "authToken" not in request.cookies:
+        return redirect("/authenticate", code=302)
     else:
-        token = request.cookies["authtoken"]
-        find_user = user.find({"authtoken": token})
-        if find_user == None:
-            return make_response(redirect("/login", code=401))
-    with open("/public/index.html", "rb") as file:
-        readBytes = file.read()
-    return make_response((readBytes, 
-                         [("Content-Type", "text/html"), ("X-Content-Type-Options", "nosniff")]))
+        token = request.cookies["authToken"].encode()
+        h = hashlib.new('sha256')
+        h.update(token)
+        hashToken = h.hexdigest()
+
+        find_user = user_login.find({"authHash": hashToken})
+        if not find_user:
+            return redirect("/authenticate", code=302)
+        else:
+            with open("/public/index.html", "rb") as file:
+                readBytes = file.read()
+            return make_response((readBytes, 
+                                [("Content-Type", "text/html"), ("X-Content-Type-Options", "nosniff")]))
 
 @app.route("/public/favicon.ico", methods=["GET"])
 def icon():
@@ -42,21 +46,28 @@ def javascriptCode():
                          [("Content-Type", "text/javascript"), ("X-Content-Type-Options", "nosniff")]))
 
 
-@app.route("/signup")
-def signup():
-    readBytes = render_template("signup.html", error="")
+@app.route("/public/authenticate.html", methods=["GET"])
+def authenticateHTML():
+    with open("/public/authenticate.html", "rb") as file:
+        readBytes = file.read()
+    return make_response((readBytes, 
+                         [("Content-Type", "text/html"), ("X-Content-Type-Options", "nosniff")]))
+
+@app.route("/authenticate", methods=["GET"])
+def authenticate():
+    readBytes = render_template("/authenticate.html", error="")
     return make_response((readBytes, 
                          [("Content-Type", "text/html"), ("X-Content-Type-Options", "nosniff")]))
 
 
-@app.route("/public/styles.css")
+@app.route("/public/styles.css", methods=["GET"])
 def styles():
     with open("/public/styles.css", "rb") as file:
         readBytes = file.read()
     return make_response((readBytes, [("Content-Type", "text/css"), ("X-Content-Type-Options", "nosniff")]))
 
 
-@app.route("/public/image/readme.jpg")
+@app.route("/public/image/readme.jpg", methods=["GET"])
 def retrieve_image():  # * retrieve images
     with open("/public/image/readme.jpg", "rb") as file:
         readBytes = file.read()
@@ -73,46 +84,69 @@ def page_not_found(error):
 
 @app.route("/register", methods=["POST"])
 def handleSignUp():
-    username = request.form.get('username')
-    password = request.form.get('password')
-    passwordCheck = request.form.get('passwordCheck')
+    if request.method == "POST":
+        username = request.form.get('username')
+        password = request.form.get('password')
+        passwordCheck = request.form.get('passwordCheck')
 
-    # TODO: placeholder code
+        # TODO: placeholder code
 
-    if password != passwordCheck:
-        return render_template("signup.html", error="Passwords are not the same")
-    elif not password and not passwordCheck:
-        return render_template("signup.html", error="Password and repeated password missing")
-    elif not password:
-        return render_template("signup.html", error="Password missing")
-    elif not passwordCheck:
-        return render_template("signup.html", error="Repeated password missing")
-    else:
-        user = user.signup(user, username, password)
-
-        if user.get("Success"):
-            return Response(b"User Registered", "200 OK", [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
-        #response = make_response((redirect("/", code=302), [("X-Content-Type-Options", "nosniff")]))
+        if password != passwordCheck:
+            return Response(render_template("/authenticate.html", error="Passwords are not the same").encode(), status=200, headers=[("X-Content-Type-Options", "nosniff")])
+        elif not password and not passwordCheck:
+            return Response(render_template("/authenticate.html", error="Password and repeated password missing").encode(), status=200, headers=[("X-Content-Type-Options", "nosniff")])
+        elif not password:
+            return Response(render_template("/authenticate.html", error="Password missing").encode(), status=200, headers=[("X-Content-Type-Options", "nosniff")])
+        elif not passwordCheck:
+            return Response(render_template("/authenticate.html", error="Repeated password missing").encode(), status=200, headers=[("X-Content-Type-Options", "nosniff")])
         else:
-            return Response(b"Error during registration", 400, [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
+            user = User()
+            user = user.signup(username, password)
+
+            if user == "Error":
+                return Response(b"Error during registration", 400, [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
+                #response = make_response((redirect("/", code=302), [("X-Content-Type-Options", "nosniff")]))
+            else:
+                return Response(b"User Registered", "200 OK", [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
+    else:
+        return Response(b"Method Not Allowed", 405, [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
 
 @app.route("/login", methods=["POST"])
 def handleLogin():
-    username = request.form.get('username')
-    password = request.form.get('password')
-
-    
-    # TODO: placeholder code
-    authToken = User.login(authToken, username, password)
-    if type(authToken) == type(Response):
-        #* error occurred
-        return Response(b"Invalid username/password", 400, [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
-    else:
+    if request.method == "POST":
+        username = request.form.get('username')
+        password = request.form.get('password')
         
-        response = make_response((redirect("/", code=302), [("X-Content-Type-Options", "nosniff")]))
-        response.set_cookie('authToken', authToken, max_age=3600,
-                            httponly=True)  # TODO: change "placeholder" to auth token to give user the cookies.
-        return response  # * redirect back to homepage
+        # TODO: placeholder code
+        authToken = User()
+        authToken = authToken.login(username, password)
+        if type(authToken) == type(Response):
+            #* error occurred
+            return Response(b"Invalid username/password", 400, [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
+        else:
+            
+            response = Response(b"", status=302, headers=[("X-Content-Type-Options", "nosniff"), ("Location", "/")])
+            response.set_cookie('authToken', authToken, max_age=3600, httponly=True)  # TODO: change "placeholder" to auth token to give user the cookies.
+            
+            return response  # * redirect back to homepage
+    else:
+        return Response(b"Method Not Allowed", 405, [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
+
+@app.route("/logout", methods=["POST"])
+def handleLogout():
+    if request.method == "POST":
+        authToken = request.cookies.get("authToken")
+        if authToken:
+            user = User()
+            user.logout(authToken)
+
+            response = Response(b"", status=302, headers=[("X-Content-Type-Options", "nosniff"), ("Location", "/authenticate")])
+            return response
+            
+        else:
+            return Response(b"Cookie Not Found", 405, [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
+    else:
+        return Response(b"Method Not Allowed", 405, [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)

@@ -19,10 +19,10 @@ class User:
         user["password"] = bcrypt.hashpw(password.encode("utf-8"), salt)
 
         if user_login.find_one({"username": user["username"]}):
-            return jsonify({"Error": "Username already exists"})
+            return "Error"
         
         user_login.insert_one(user)
-        return jsonify(user)
+        return "Success"
     
     def login(self, username, password):
         #* prevent HTML injection
@@ -33,12 +33,24 @@ class User:
         user = user_login.find_one({"username": username})
 
         if user:
-            if user["password"] == bcrypt.hashpw(password, user["salt"]):
+            if user["password"] == bcrypt.hashpw(password.encode("utf-8"), user["salt"]):
                 authToken = secrets.token_hex(20) 
                 hashedAuth = hashlib.new('sha256')
                 hashedAuth.update(authToken.encode())
                 hashedAuth = hashedAuth.hexdigest()
+                user_login.update_one({"username":username}, {"$set":{"authHash":hashedAuth}})
 
                 return authToken
         else:
-            return jsonify({"Error": "Invalid username/password"})
+            return jsonify([{"Error": "Invalid username/password"}], status=400, mimetype="application/json")
+    
+    def logout(self, token):
+        hashedAuth = hashlib.new('sha256')
+        hashedAuth.update(token.encode())
+        hashedAuth = hashedAuth.hexdigest()
+
+        if user_login.find_one({"authHash": hashedAuth}):
+            user_login.update_one({"authHash": hashedAuth}, {"$unset":{"authHash":""}})
+            return "Logged Out"
+        else:
+            return "Error"
