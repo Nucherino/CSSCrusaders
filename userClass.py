@@ -1,18 +1,44 @@
-import uuid
-from passlib.hash import pbkdf2_sha256
+import bcrypt, secrets, hashlib
 from flask import jsonify
 from database import user_login
 
 class User:
     def signup(self, username, password):
-        saltRounds = 10
+        #* prevent HTML injection
+        username = username.replace('&', "&amp")
+        username = username.replace('<', "&lt")
+        username = username.replace('>', "&gt")
+
         user = {
-            "_id": uuid.uuid4().hex,
-            "username": username,
+            "username": username, #TODO: make username HTML-injection safe
             "password": password,
         }
-        user["password"] = pbkdf2_sha256.encrypt(user["password"])
+
+        salt = bcrypt.gensalt()
+        user["salt"] = salt
+        user["password"] = bcrypt.hashpw(password.encode("utf-8"), salt)
+
         if user_login.find_one({"username": user["username"]}):
-            return jsonify({"Error": "Username already exists"}), 400
+            return jsonify({"Error": "Username already exists"})
+        
         user_login.insert_one(user)
-        return jsonify(user), 200
+        return jsonify(user)
+    
+    def login(self, username, password):
+        #* prevent HTML injection
+        username = username.replace('&', "&amp")
+        username = username.replace('<', "&lt")
+        username = username.replace('>', "&gt")
+
+        user = user_login.find_one({"username": username})
+
+        if user:
+            if user["password"] == bcrypt.hashpw(password, user["salt"]):
+                authToken = secrets.token_hex(20) 
+                hashedAuth = hashlib.new('sha256')
+                hashedAuth.update(authToken.encode())
+                hashedAuth = hashedAuth.hexdigest()
+
+                return authToken
+        else:
+            return jsonify({"Error": "Invalid username/password"})
