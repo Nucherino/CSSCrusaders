@@ -41,6 +41,8 @@ class User:
                 user_login.update_one({"username":username}, {"$set":{"authHash":hashedAuth}})
 
                 return authToken
+            else:
+                return jsonify([{"Error": "Invalid username/password"}], status=400, mimetype="application/json")
         else:
             return jsonify([{"Error": "Invalid username/password"}], status=400, mimetype="application/json")
     
