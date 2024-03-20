@@ -1,4 +1,4 @@
-<html lang="en">
+<!DOCTYPE html lang="en">
   <head>
     <title>CSSCrusaders Project</title>
     <link rel="stylesheet" type="text/css" href="/public/styles.css" />
@@ -7,27 +7,41 @@
 
   <div class="title">
     <h2>CSE312 CSSCrusaders Project</h2>
-    <form
-      action="/logout"
-      method="post"
-      enctype="application/x-www-form-urlencoded">
-      <input type="submit" value="Log Out" />
-    </form>
+    <p>{{user}}</p>
+    <div class="logout-button">
+      <form
+        action="/logout"
+        method="post"
+        enctype="application/x-www-form-urlencoded">
+        <input type="submit" value="Log Out" />
+      </form>
+    </div>
   </div>
 
   <div class="header">
-    <div class="welcome-div">
-        <p id="paragraph">Welcome!</p>
+    <div class="main-div">
+      <div class="image_div">
+        <img src="/public/image/readme.jpg" alt="SQUIDWARD" class="squidward" />
+      </div>
+        <p id="paragraph">Posts</p>
+        <div class="posts border-gradient">
+          {% for post in posts %}
+          <div id="list-posts">
+            {{post.username + ': ' + post.content}}
+          </div>
+          {%endfor%}
+          <div class="post-form">
+              <hr>
+              <form action="/" method="post">
+                <input placeholder="Write your post here..." id="post-text-box" type="text" name='post'>
+                <div class="post-button">
+                  <input type="submit" value="Post">
+                </div>
+              </form>
+          </div>
+        </div>
     </div>
   </div>
-  <br />
-    <div class="image_div">
-        <img src="/public/image/readme.jpg" alt="SQUIDWARD" class="squidward" />
-    </div>
-    <div class="test-button">
-        <p id="demo">This will say passed if it works, press the button</p>
-        <button onclick="myFunction()">Test</button>
-        <script src="/public/app.js"></script>
-    </div>
+<script src="/public/app.js"></script>
 </body>
 </html>

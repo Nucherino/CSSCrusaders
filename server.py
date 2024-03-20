@@ -2,6 +2,8 @@ from flask import Flask, request, make_response, redirect, render_template, Resp
 from database import user_login
 from userClass import User
 import mimetypes, hashlib
+from postClass import PostHandler
+import json
 
 mimetypes.add_type('text/css', '.css')
 mimetypes.add_type('text/javascript', '.js')
@@ -24,11 +26,12 @@ def home():
         find_user = user_login.find({"authHash": hashToken})
         if not find_user:
             return redirect("/authenticate", code=302)
-        else:
-            with open("/public/index.html", "rb") as file:
-                readBytes = file.read()
-            return make_response((readBytes, 
-                                [("Content-Type", "text/html"), ("X-Content-Type-Options", "nosniff")]))
+        posts = PostHandler()
+        posts.db.collection.drop()
+        posts.db.id_collection.drop()
+        print(posts.get_all_posts_sorted_by_id)
+        return Response(render_template("/index.html", posts = posts.get_all_posts_sorted_by_id()), status ="200", headers=[("X-Content-Type-Options", "nosniff")])
+
 
 @app.route("/public/favicon.ico", methods=["GET"])
 def icon():
@@ -147,6 +150,28 @@ def handleLogout():
             return Response(b"Cookie Not Found", 405, [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
     else:
         return Response(b"Method Not Allowed", 405, [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
+
+@app.route("/", methods=["POST"])
+def posts():
+    if "authToken" not in request.cookies:
+      return redirect("/authenticate", code=302)
+    else:
+        token = request.cookies["authToken"].encode()
+        h = hashlib.new('sha256')
+        h.update(token)
+        hashToken = h.hexdigest()
+
+        find_user = user_login.find({"authHash": hashToken})
+        if not find_user:
+            return redirect("/authenticate", code=302)
+        else:
+            newPost = PostHandler()
+            username = user_login.find_one({"authHash": hashToken})
+            username = username['username']
+            post = request.form.get('post')
+            if post != None and post !="":
+                newPost.create_post(str(username), str(post))
+            return Response(b"", status=302, headers=[("X-Content-Type-Options", "nosniff"), ("Location", "/")])
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
