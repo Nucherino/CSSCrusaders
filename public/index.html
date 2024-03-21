@@ -5,6 +5,7 @@
     <link rel="shortcut icon" type="image/x-icon" href="/public/favicon.ico" />
   </head>
 
+  <body onload="addText();">
   <div class="title">
     <h2>CSE312 CSSCrusaders Project</h2>
     <p>{{user}}</p>
@@ -23,7 +24,7 @@
       <div class="image_div">
         <img src="/public/image/readme.jpg" alt="SQUIDWARD" class="squidward" />
       </div>
-        <p id="paragraph">Posts</p>
+        <p id="post-title"></p>
         <div class="posts border-gradient">
           {% for post in posts %}
           <div id="list-posts">
