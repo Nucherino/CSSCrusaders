@@ -213,7 +213,7 @@ def like_post():
         "success": success,
         "likeCount": updated_like_count
     }
-    return Response(response=response_data, status=200, mimetype='application/json')
+    return Response(response=response_data, status=200, mimetype='application/json', headers=[("X-Content-Type-Options", "nosniff")])
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
