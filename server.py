@@ -194,6 +194,26 @@ def posts():
                 newPost.create_post(str(username), str(post))
             return Response(b"", status=302, headers=[("X-Content-Type-Options", "nosniff"), ("Location", "/")])
 
+@app.route("/like", methods=["POST"])
+def like_post():
+    data = request.json
+    postId = data.get('postId')
+    username = data.get('username')
+    post_handler = PostHandler()
+    post = post_handler.collection.find_one({"post_id": postId})
+    if post:
+        if username in post["likes"]:
+            success = post_handler.unlike_post(postId, username)
+        else:
+            success = post_handler.like_post(postId, username)
+    else:
+        success = False
+    updated_like_count = len(post.get("likes", []))
+    response_data = {
+        "success": success,
+        "likeCount": updated_like_count
+    }
+    return Response(response=response_data, status=200, mimetype='application/json')
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)

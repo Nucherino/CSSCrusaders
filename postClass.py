@@ -7,7 +7,7 @@ class Post:
         self.postID = postID
         self.username = username
         self.content = content
-        self.likes = {}
+        self.likes = []
 
     def save_to_database(self):
         post_dict = {
@@ -19,8 +19,12 @@ class Post:
         database.posts_collection.insert_one(post_dict)
 
     def add_like(self, username):
-        self.likes[username] = True
+        if username not in self.likes:
+            self.likes.append(username)
 
+    def remove_like(self, username):
+        if username in self.likes:
+            self.likes.remove(username)
 
 class PostHandler:
     def __init__(self):
@@ -53,7 +57,14 @@ class PostHandler:
 
     def like_post(self, post_id, username):
         post = self.collection.find_one({"post_id": post_id})
-        if post and post["likes"].get(username) is None:
-            self.collection.update_one({"post_id": post_id}, {("likes." + username): True})
+        if post and username not in post["likes"]:
+            self.collection.update_one({"post_id": post_id}, {"$push": {"likes": username}})
+            return True
+        return False
+
+    def unlike_post(self, post_id, username):
+        post = self.collection.find_one({"post_id": post_id})
+        if post and username in post["likes"]:
+            self.collection.update_one({"post_id": post_id}, {"$pull": {"likes": username}})
             return True
         return False

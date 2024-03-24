@@ -89,6 +89,21 @@ hr {
   bottom: 100px;
 }
 
+.post-likes {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: dimgray;
+}
+
+.post-likes:hover {
+  color: black;
+}
+
+.likes-selected {
+  color: darkgreen;
+}
+
 #post-title {
   font-size: 16px;
 }

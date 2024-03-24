@@ -3,6 +3,7 @@
     <title>CSSCrusaders Project</title>
     <link rel="stylesheet" type="text/css" href="/public/styles.css" />
     <link rel="shortcut icon" type="image/x-icon" href="/public/favicon.ico" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   </head>
 
   <body onload="addText();">
@@ -27,10 +28,14 @@
         <p id="post-title"></p>
         <div class="posts border-gradient">
           {% for post in posts %}
-          <div id="list-posts">
-            {{post.username + ': ' + post.content}}
-          </div>
-          {%endfor%}
+            <div class="list-posts" data-post-id="{{ post.post_id }}">
+                {{ post.username + ': ' + post.content }}
+                <div class="post-likes" data-post-id="{{ post.post_id }}">
+                    <span class="material-icons">thumb_up</span>
+                    <span class="like-count">0</span>
+                </div>
+            </div>
+          {% endfor %}
           <div class="post-form">
               <hr>
               <form action="/" method="post">
