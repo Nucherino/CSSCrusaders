@@ -18,13 +18,6 @@ class Post:
         }
         database.posts_collection.insert_one(post_dict)
 
-    def add_like(self, username):
-        if username not in self.likes:
-            self.likes.append(username)
-
-    def remove_like(self, username):
-        if username in self.likes:
-            self.likes.remove(username)
 
 class PostHandler:
     def __init__(self):
@@ -33,6 +26,10 @@ class PostHandler:
         self.collection = database.posts_collection
         self.id_collection = database.id_collection
         self.ensure_id_counter_exists()
+
+    def get_likes(self, post_id):
+        postFound = self.collection.find_one({"id": post_id})
+        return len(postFound["likes"])
 
     def ensure_id_counter_exists(self):
         if self.id_collection.find_one() is None:

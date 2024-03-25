@@ -1,5 +1,5 @@
 import html
-from flask import Flask, request, make_response, redirect, render_template, Response
+from flask import Flask, request, make_response, redirect, render_template, Response, jsonify
 from database import user_login
 from userClass import User
 import mimetypes, hashlib
@@ -194,6 +194,7 @@ def posts():
                 newPost.create_post(str(username), str(post))
             return Response(b"", status=302, headers=[("X-Content-Type-Options", "nosniff"), ("Location", "/")])
 
+
 @app.route("/like", methods=["POST"])
 def like_post():
     data = request.json
@@ -203,17 +204,20 @@ def like_post():
     post = post_handler.collection.find_one({"post_id": postId})
     if post:
         if username in post["likes"]:
-            success = post_handler.unlike_post(postId, username)
+            post_handler.unlike_post(postId, username)
+            liked = False
         else:
-            success = post_handler.like_post(postId, username)
+            post_handler.like_post(postId, username)
+            liked = True
     else:
-        success = False
-    updated_like_count = len(post.get("likes", []))
+        liked = False
+    updated_like_count = post_handler.get_likes(postId)
     response_data = {
-        "success": success,
+        "liked": liked,
         "likeCount": updated_like_count
     }
-    return Response(response=response_data, status=200, mimetype='application/json', headers=[("X-Content-Type-Options", "nosniff")])
+    return jsonify(response_data)
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
