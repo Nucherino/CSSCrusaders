@@ -136,7 +136,7 @@ def handleLogin():
         # TODO: placeholder code
         authToken = User()
         authToken = authToken.login(username, password)
-        if type(authToken) == type(Response):
+        if authToken == "Invalid username/password":
             # * error occurred
             return Response(b"Invalid username/password", 400,
                             [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])

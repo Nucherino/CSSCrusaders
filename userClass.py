@@ -42,9 +42,9 @@ class User:
 
                 return authToken
             else:
-                return jsonify([{"Error": "Invalid username/password"}], status=400, mimetype="application/json")
+                return "Invalid username/password"
         else:
-            return jsonify([{"Error": "Invalid username/password"}], status=400, mimetype="application/json")
+            return "Invalid username/password"
     
     def logout(self, token):
         hashedAuth = hashlib.new('sha256')
