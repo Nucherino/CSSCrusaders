@@ -159,11 +159,9 @@ def handleLogout():
         if authToken:
             user = User()
             user.logout(authToken)
-
             response = Response(b"", status=302,
                                 headers=[("X-Content-Type-Options", "nosniff"), ("Location", "/authenticate")])
             return response
-
         else:
             return Response(b"Cookie Not Found", 405,
                             [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
@@ -198,26 +196,25 @@ def posts():
 @app.route("/like", methods=["POST"])
 def like_post():
     data = request.json
-    postId = data.get('postId')
+    postId = int(data.get('postId'))
     username = data.get('username')
+    print(username)
+    print(postId)
     post_handler = PostHandler()
     post = post_handler.collection.find_one({"post_id": postId})
-    if post:
-        if username in post["likes"]:
-            post_handler.unlike_post(postId, username)
-            liked = False
-        else:
-            post_handler.like_post(postId, username)
-            liked = True
-    else:
+    print(post)
+    if username in post["likes"]:
+        post_handler.unlike_post(postId, username)
         liked = False
+    else:
+        post_handler.like_post(postId, username)
+        liked = True
     updated_like_count = post_handler.get_likes(postId)
     response_data = {
         "liked": liked,
         "likeCount": updated_like_count
     }
     return jsonify(response_data)
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
