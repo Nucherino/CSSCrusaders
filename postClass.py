@@ -54,14 +54,10 @@ class PostHandler:
 
     def like_post(self, post_id, username):
         post = self.collection.find_one({"post_id": post_id})
-        if post and username not in post["likes"]:
-            database.posts_collection.update_one({"post_id": post_id}, {"$push": {"likes": username}})
-            return True
-        return False
+        database.posts_collection.update_one({"post_id": post_id}, {"$push": {"likes": username}})
+        return True
 
     def unlike_post(self, post_id, username):
         post = self.collection.find_one({"post_id": post_id})
-        if post and username in post["likes"]:
-            database.posts_collection.update_one({"post_id": post_id}, {"$pull": {"likes": username}})
-            return True
+        database.posts_collection.update_one({"post_id": post_id}, {"$pull": {"likes": username}})
         return False
