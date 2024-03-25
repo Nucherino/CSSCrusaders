@@ -31,29 +31,39 @@ def home():
         if not find_user:
             return redirect("/authenticate", code=302)
         
-        with open("public/index.html", "r")as html:
-            body = html.read()
-        soup = BeautifulSoup(body, "html.parser")
-        old_text = soup.find(id = "username-form")
-        new_text = old_text.find(text=re.compile("{{user}}")).replace_with(find_user.get("username"))
+        #with open("public/index.html", "r") as html:
+        #    body = html.read()
+        #soup = BeautifulSoup(body, "html.parser")
+        #old_text = soup.find(id = "username-form")
+        #new_text = old_text.find(text=re.compile("{{user}}")).replace_with(find_user.get("username"))
+
+        name = find_user.get("username")
         
-        body = soup.prettify("utf-8")
+        user = name
 
         posts = PostHandler()
         posts.db.collection.drop()
         posts.db.id_collection.drop()
+
+        #old_post = soup.find()
         print(posts.get_all_posts_sorted_by_id)
         print(posts)
+
         initial_like_counts = {}
         for post in posts.get_all_posts_sorted_by_id():
             post_id = post["post_id"]
             like_count = posts.get_likes(post_id)
             initial_like_counts[post_id] = like_count
 
-        response = make_response(body, 200)
-        response.headers.set("X-Content-Type-Options", "nosniff")
-        response.headers.set("posts", posts.get_all_posts_sorted_by_id)
-        return response
+        #body = soup.prettify("utf-8")
+        #response = make_response(body, 200)
+        #response.headers.set("X-Content-Type-Options", "nosniff")
+        #response.headers.set("posts", posts=posts.get_all_posts_sorted_by_id)
+        #return response
+
+        return Response(render_template("/index.html", posts=posts.get_all_posts_sorted_by_id(),
+                                        initial_like_counts=initial_like_counts, user=user), status="200",
+                        headers=[("X-Content-Type-Options", "nosniff")])
 
 @app.route("/public/favicon.ico", methods=["GET"])
 def icon():
