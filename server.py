@@ -5,6 +5,8 @@ from userClass import User
 import mimetypes, hashlib
 from postClass import PostHandler
 import json
+from bs4 import BeautifulSoup
+import re
 
 mimetypes.add_type('text/css', '.css')
 mimetypes.add_type('text/javascript', '.js')
@@ -25,9 +27,18 @@ def home():
         h.update(token)
         hashToken = h.hexdigest()
 
-        find_user = user_login.find({"authHash": hashToken})
+        find_user = user_login.find_one({"authHash": hashToken})
         if not find_user:
             return redirect("/authenticate", code=302)
+        
+        with open("public/index.html", "r")as html:
+            body = html.read()
+        soup = BeautifulSoup(body, "html.parser")
+        old_text = soup.find(id = "username-form")
+        new_text = old_text.find(text=re.compile("{{user}}")).replace_with(find_user.get("username"))
+        
+        body = soup.prettify("utf-8")
+
         posts = PostHandler()
         posts.db.collection.drop()
         posts.db.id_collection.drop()
@@ -38,10 +49,11 @@ def home():
             post_id = post["post_id"]
             like_count = posts.get_likes(post_id)
             initial_like_counts[post_id] = like_count
-        return Response(render_template("/index.html", posts=posts.get_all_posts_sorted_by_id(),
-                                        initial_like_counts=initial_like_counts), status="200",
-                        headers=[("X-Content-Type-Options", "nosniff")])
 
+        response = make_response(body, 200)
+        response.headers.set("X-Content-Type-Options", "nosniff")
+        response.headers.set("posts", posts.get_all_posts_sorted_by_id)
+        return response
 
 @app.route("/public/favicon.ico", methods=["GET"])
 def icon():
