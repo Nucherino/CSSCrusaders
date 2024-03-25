@@ -94,6 +94,7 @@ hr {
   align-items: center;
   cursor: pointer;
   color: dimgray;
+  padding-left: 49%;
 }
 
 .post-likes:hover {

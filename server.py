@@ -42,8 +42,6 @@ def home():
         user = name
 
         posts = PostHandler()
-        posts.db.collection.drop()
-        posts.db.id_collection.drop()
 
         #old_post = soup.find()
         print(posts.get_all_posts_sorted_by_id)
