@@ -1,6 +1,26 @@
 function addText () {
     document.getElementById("post-title").innerHTML += "Posts";
 }
+function fetchInitialLikeCounts() {
+    document.querySelectorAll(".post-likes").forEach(like => {
+        const postId = like.parentElement.dataset.postId;
+        fetch(`/like?postId=${postId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                const counter = like.querySelector(".like-count");
+                counter.innerText = data.likeCount;
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+    });
+}
+window.addEventListener("load", fetchInitialLikeCounts);
 document.querySelectorAll(".post-likes").forEach(like => {
   like.addEventListener("click", function() {
     const postId = this.parentElement.dataset.postId;

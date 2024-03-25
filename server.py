@@ -32,7 +32,14 @@ def home():
         posts.db.collection.drop()
         posts.db.id_collection.drop()
         print(posts.get_all_posts_sorted_by_id)
-        return Response(render_template("/index.html", posts=posts.get_all_posts_sorted_by_id()), status="200",
+        print(posts)
+        initial_like_counts = {}
+        for post in posts.get_all_posts_sorted_by_id():
+            post_id = post["post_id"]
+            like_count = posts.get_likes(post_id)
+            initial_like_counts[post_id] = like_count
+        return Response(render_template("/index.html", posts=posts.get_all_posts_sorted_by_id(),
+                                        initial_like_counts=initial_like_counts), status="200",
                         headers=[("X-Content-Type-Options", "nosniff")])
 
 
