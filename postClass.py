@@ -54,10 +54,12 @@ class PostHandler:
 
     def like_post(self, post_id, username):
         post = self.collection.find_one({"post_id": post_id})
-        database.posts_collection.update_one({"post_id": post_id}, {"$push": {"likes": username}})
+        post["likes"].append(username)
+        self.collection.replace_one({"post_id": post_id}, post)
         return True
 
     def unlike_post(self, post_id, username):
         post = self.collection.find_one({"post_id": post_id})
-        database.posts_collection.update_one({"post_id": post_id}, {"$pull": {"likes": username}})
+        post["likes"].remove(username)
+        self.collection.replace_one({"post_id": post_id}, post)
         return False

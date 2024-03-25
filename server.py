@@ -197,7 +197,12 @@ def posts():
 def like_post():
     data = request.json
     postId = int(data.get('postId'))
-    username = data.get('username')
+    token = request.cookies["authToken"].encode()
+    h = hashlib.new('sha256')
+    h.update(token)
+    hashToken = h.hexdigest()
+    username = user_login.find_one({"authHash": hashToken})
+    username = username['username']
     print(username)
     print(postId)
     post_handler = PostHandler()
