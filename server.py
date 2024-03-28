@@ -1,6 +1,6 @@
 import html
 from flask import Flask, request, make_response, redirect, render_template, Response, jsonify
-from database import user_login
+from database import *
 from userClass import User
 import mimetypes, hashlib
 from postClass import PostHandler
@@ -30,20 +30,20 @@ def home():
         find_user = user_login.find_one({"authHash": hashToken})
         if not find_user:
             return redirect("/authenticate", code=302)
-        
-        #with open("public/index.html", "r") as html:
+
+        # with open("public/index.html", "r") as html:
         #    body = html.read()
-        #soup = BeautifulSoup(body, "html.parser")
-        #old_text = soup.find(id = "username-form")
-        #new_text = old_text.find(text=re.compile("{{user}}")).replace_with(find_user.get("username"))
+        # soup = BeautifulSoup(body, "html.parser")
+        # old_text = soup.find(id = "username-form")
+        # new_text = old_text.find(text=re.compile("{{user}}")).replace_with(find_user.get("username"))
 
         name = find_user.get("username")
-        
+
         user = name
 
         posts = PostHandler()
 
-        #old_post = soup.find()
+        # old_post = soup.find()
         print(posts.get_all_posts_sorted_by_id)
         print(posts)
 
@@ -53,15 +53,16 @@ def home():
             like_count = posts.get_likes(post_id)
             initial_like_counts[post_id] = like_count
 
-        #body = soup.prettify("utf-8")
-        #response = make_response(body, 200)
-        #response.headers.set("X-Content-Type-Options", "nosniff")
-        #response.headers.set("posts", posts=posts.get_all_posts_sorted_by_id)
-        #return response
+        # body = soup.prettify("utf-8")
+        # response = make_response(body, 200)
+        # response.headers.set("X-Content-Type-Options", "nosniff")
+        # response.headers.set("posts", posts=posts.get_all_posts_sorted_by_id)
+        # return response
 
         return Response(render_template("/index.html", posts=posts.get_all_posts_sorted_by_id(),
                                         initial_like_counts=initial_like_counts, user=user), status="200",
                         headers=[("X-Content-Type-Options", "nosniff")])
+
 
 @app.route("/public/favicon.ico", methods=["GET"])
 def icon():
@@ -147,6 +148,10 @@ def handleSignUp():
                                 [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
                 # response = make_response((redirect("/", code=302), [("X-Content-Type-Options", "nosniff")]))
             else:
+                user_login.update({"username": username}, {"$set": {"image": "public/image/image0.png"}})
+                if image_id_collection.find_one() is None:
+                    image_id_collection.insert_one({"id": 0})
+                user_login.update({"username": username}, {"$set": {"image_id": 0}})
                 return Response(b"User Registered", "200 OK",
                                 [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
     else:
@@ -247,6 +252,7 @@ def like_post():
         "likeCount": updated_like_count
     }
     return jsonify(response_data)
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
