@@ -56,3 +56,15 @@ class User:
             return "Logged Out"
         else:
             return "Error"
+        
+    def checkLoggedIn(self, token):
+        hashedAuth = hashlib.new('sha256')
+        hashedAuth.update(token.encode())
+        hashedAuth = hashedAuth.hexdigest()
+
+        foundUser = user_login.find_one({"authHash": hashedAuth})
+        if foundUser:
+            return foundUser
+        else:
+            return None
+

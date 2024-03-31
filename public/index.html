@@ -7,16 +7,31 @@
   </head>
 
   <body onload="addText();">
-  <div class="title">
-    <h2>CSE312 CSSCrusaders Project</h2>
-    <p id="username-form">{{user}}</p>
-    <div class="logout-button">
-      <form
-        action="/logout"
-        method="post"
-        enctype="application/x-www-form-urlencoded">
-        <input type="submit" value="Log Out" />
-      </form>
+  <div style="display:flex" class="title">
+    <div style="flex: 70%;">
+      <h2>CSE312 CSSCrusaders Project</h2>
+    </div>
+    <div style="display:flex; flex-direction: column; flex: 30%">
+      <div style="display: flex;">
+        <div style="align-self: center;">
+          <p id="username-form">Your username: {{user}}</p>
+        </div>
+        <div style="display: flex;">
+          <form style="align-self: center; margin-left: 5px; margin-bottom: 0px;"
+            action="/logout"
+            method="post"
+            enctype="application/x-www-form-urlencoded">
+            <input type="submit" value="Log Out" />
+          </form>
+        </div>
+      </div>
+      <div>
+        <form style="display: flex; flex-direction:row" action="/file-upload" id="image-message" method="post" enctype="multipart/form-data">
+          <label for="upload-file">Upload a video or image: </label>
+          <input id="upload-file" type="file" name="file">
+          <input type="submit" value="Send">
+        </form>
+      </div>
     </div>
   </div>
 
@@ -38,7 +53,7 @@
           {% endfor %}
           <div class="post-form">
               <hr>
-              <form action="/" method="post">
+              <form action="/chat-messages" method="post">
                 <input placeholder="Write your post here..." id="post-text-box" type="text" name='post'>
                 <div class="post-button">
                   <input type="submit" value="Post">

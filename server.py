@@ -1,18 +1,16 @@
-import html
+import html, fleep, os
 from flask import Flask, request, make_response, redirect, render_template, Response, jsonify
 from database import *
-from userClass import User
+from userClass import *
 import mimetypes, hashlib
 from postClass import PostHandler
-import json
-from bs4 import BeautifulSoup
-import re
 
 mimetypes.add_type('text/css', '.css')
 mimetypes.add_type('text/javascript', '.js')
 
 app = Flask(__name__, template_folder='public')
-
+UPLOAD_FOLDER = 'public/image'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # * -------------------------- GET REQUESTS ------------------------------
 
@@ -148,10 +146,9 @@ def handleSignUp():
                                 [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
                 # response = make_response((redirect("/", code=302), [("X-Content-Type-Options", "nosniff")]))
             else:
-                user_login.update({"username": username}, {"$set": {"image": "public/image/image0.png"}})
-                if image_id_collection.find_one() is None:
+                user_login.update_one({"username": username}, {"$set": {"image": "public/image/image0.png"}})
+                if image_id_collection.find_one({}) is None:
                     image_id_collection.insert_one({"id": 0})
-                user_login.update({"username": username}, {"$set": {"image_id": 0}})
                 return Response(b"User Registered", "200 OK",
                                 [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
     else:
@@ -202,7 +199,7 @@ def handleLogout():
                         [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
 
 
-@app.route("/", methods=["POST"])
+@app.route("/chat-messages", methods=["POST"])
 def posts():
     if "authToken" not in request.cookies:
         return redirect("/authenticate", code=302)
@@ -253,6 +250,38 @@ def like_post():
     }
     return jsonify(response_data)
 
+@app.route("/file-upload", methods=["POST"])
+def profilePicUpload():
+    if request.method == "POST":
+        if 'file' not in request.files:
+            return Response(b"No file", 400,
+                        [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
+        #* allowedExtensions = {'.jpg', '.jpeg', '.jfif', 'pjpeg', 'pjp', 'png', }
+        file = request.files['file']
+        if file.filename == '':
+            return Response(b"No selected file", 400,
+                        [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
+        fileInfo = fleep.get(file.stream.read())
+        if file and fileInfo.type_matches('raster-image'):
+            user = User()
+            if "authToken" not in request.cookies:
+                return redirect("/authenticate", code=302)
+            userDoc = user.checkLoggedIn(request.cookies["authToken"])
+            if userDoc:
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], f"image{image_id_collection.count_documents({})}{fileInfo.extension[0]}"))
+                user_login.update_one({"username": userDoc["username"]}, {"$set": {"image": f"public/image/image{image_id_collection.count_documents({})}{fileInfo.extension[0]}"}})
+                image_id_collection.insert_one({"id":image_id_collection.count_documents({})})
+                return redirect("/", 302, Response(b"Redirect", 302, [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")]))
+            else:
+                return redirect("/authenticate", code=302)
+        else:
+            return Response(b"Not image", 400,
+                        [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
+    else:
+        return Response(b"Method Not Allowed", 405,
+                        [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
+    
+
