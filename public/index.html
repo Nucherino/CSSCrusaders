@@ -44,6 +44,9 @@
         <div class="posts border-gradient">
           {% for post in posts %}
             <div class="list-posts" data-post-id="{{ post.post_id }}" data-username="{{ post.username }}">
+                <div class="profile-pic">
+                  <img src="{{profile_pic}}" alt="Profile Picture" width="50" height="50">
+                </div>
                 {{ post.username + ': ' + post.content }}
                 <div class="post-likes">
                     <span class="material-icons">thumb_up</span>

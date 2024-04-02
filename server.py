@@ -1,5 +1,5 @@
 import html, fleep, os
-from flask import Flask, request, make_response, redirect, render_template, Response, jsonify
+from flask import Flask, request, make_response, redirect, render_template, send_from_directory, Response, jsonify
 from database import *
 from userClass import *
 import mimetypes, hashlib
@@ -7,9 +7,12 @@ from postClass import PostHandler
 
 mimetypes.add_type('text/css', '.css')
 mimetypes.add_type('text/javascript', '.js')
+mimetypes.add_type('image/png', '.png')
+mimetypes.add_type('image/jpeg', '.jpeg')
+mimetypes.add_type('image/jpg', '.jpg')
 
 app = Flask(__name__, template_folder='public')
-UPLOAD_FOLDER = 'public/image'
+UPLOAD_FOLDER = '/public/image'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # * -------------------------- GET REQUESTS ------------------------------
@@ -44,12 +47,14 @@ def home():
         # old_post = soup.find()
         print(posts.get_all_posts_sorted_by_id)
         print(posts)
-
+        profile_pic = "/public/image/image0.png"
         initial_like_counts = {}
         for post in posts.get_all_posts_sorted_by_id():
             post_id = post["post_id"]
             like_count = posts.get_likes(post_id)
             initial_like_counts[post_id] = like_count
+            curr_user = user_login.find_one({"username": post["username"]})
+            profile_pic = curr_user["image"]
 
         # body = soup.prettify("utf-8")
         # response = make_response(body, 200)
@@ -58,7 +63,7 @@ def home():
         # return response
 
         return Response(render_template("/index.html", posts=posts.get_all_posts_sorted_by_id(),
-                                        initial_like_counts=initial_like_counts, user=user), status="200",
+                                        initial_like_counts=initial_like_counts, user=user, profile_pic=profile_pic), status="200",
                         headers=[("X-Content-Type-Options", "nosniff")])
 
 
@@ -100,11 +105,10 @@ def styles():
     return make_response((readBytes, [("Content-Type", "text/css"), ("X-Content-Type-Options", "nosniff")]))
 
 
-@app.route("/public/image/readme.jpg", methods=["GET"])
-def retrieve_image():  # * retrieve images
-    with open("/public/image/readme.jpg", "rb") as file:
-        readBytes = file.read()
-    return make_response((readBytes, [("Content-Type", "image/jpg"), ("X-Content-Type-Options", "nosniff")]))
+@app.route("/public/image/<path:imagePath>", methods=["GET"])
+def retrieve_image(imagePath):  # * retrieve images
+    return send_from_directory(UPLOAD_FOLDER, imagePath)
+
 
 
 @app.errorhandler(404)
@@ -268,8 +272,8 @@ def profilePicUpload():
                 return redirect("/authenticate", code=302)
             userDoc = user.checkLoggedIn(request.cookies["authToken"])
             if userDoc:
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], f"image{image_id_collection.count_documents({})}{fileInfo.extension[0]}"))
-                user_login.update_one({"username": userDoc["username"]}, {"$set": {"image": f"public/image/image{image_id_collection.count_documents({})}{fileInfo.extension[0]}"}})
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], f"image{image_id_collection.count_documents({})}.{fileInfo.extension[0]}"))
+                user_login.update_one({"username": userDoc["username"]}, {"$set": {"image": f"/public/image/image{image_id_collection.count_documents({})}.{fileInfo.extension[0]}"}})
                 image_id_collection.insert_one({"id":image_id_collection.count_documents({})})
                 return redirect("/", 302, Response(b"Redirect", 302, [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")]))
             else:
