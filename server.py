@@ -1,4 +1,4 @@
-import html, fleep, os
+import html, fleep, os, json
 from flask import Flask, request, make_response, redirect, render_template, send_from_directory, Response, jsonify
 from database import *
 from userClass import *
@@ -220,7 +220,9 @@ def posts():
             newPost = PostHandler()
             username = user_login.find_one({"authHash": hashToken})
             username = username['username']
-            post = html.escape(request.form.get('post'))
+            post = json.loads(request.get_data()).get("message")
+
+            #post = post["message"]
             if post != None and post != "":
                 newPost.create_post(str(username), str(post))
             return Response(b"", status=302, headers=[("X-Content-Type-Options", "nosniff"), ("Location", "/")])

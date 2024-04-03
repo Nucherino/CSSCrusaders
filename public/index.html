@@ -56,7 +56,8 @@
           {% endfor %}
           <div class="post-form">
               <hr>
-              <form action="/chat-messages" method="post">
+              <form name=form onsubmit="sendChat()">
+              <!--<form action="/chat-messages" method="post">-->
                 <input placeholder="Write your post here..." id="post-text-box" type="text" name='post'>
                 <div class="post-button">
                   <input type="submit" value="Post">

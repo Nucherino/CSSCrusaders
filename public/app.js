@@ -1,6 +1,37 @@
+const ws = false;
+let socket = null;
+
 function addText () {
-    document.getElementById("post-title").innerHTML += "Posts";
+  document.getElementById("post-text-box").focus();
+  document.getElementById("post-title").innerHTML += "Posts";
+  if(ws){
+    socket = new WebSocket('ws://' + window.location.host + "/websocket");
+  }  
 }
+
+function sendChat () {
+    const chatTextBox = document.getElementById('post-text-box');
+    const message = chatTextBox.value;
+    chatTextBox.value = "";
+
+    if (ws){
+      socket.send(JSON.stringify({"message": message}));
+    }
+    else {
+      fetch("/chat-messages", {
+        method: "POST", 
+        body: JSON.stringify({"message":message}),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then((result) => {
+        console.log(result);
+      })
+    }
+  chatTextBox.focus();
+}
+
 function fetchInitialLikeCounts() {
     document.querySelectorAll(".post-likes").forEach(like => {
         const postId = like.parentElement.dataset.postId;
