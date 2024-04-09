@@ -1,5 +1,6 @@
 import html, fleep, os, json
 from flask import Flask, request, make_response, redirect, render_template, send_from_directory, Response, jsonify
+from flask_socketio import SocketIO
 from database import *
 from userClass import *
 import mimetypes, hashlib
@@ -14,6 +15,7 @@ mimetypes.add_type('image/jpg', '.jpg')
 app = Flask(__name__, template_folder='public')
 UPLOAD_FOLDER = '/public/image'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+socketio = SocketIO(app)
 
 # * -------------------------- GET REQUESTS ------------------------------
 
@@ -66,6 +68,10 @@ def home():
                                         initial_like_counts=initial_like_counts, user=user, profile_pic=profile_pic), status="200",
                         headers=[("X-Content-Type-Options", "nosniff")])
 
+
+#@socketio.on('new_post') This may need to be added for posts later on - but alterations to front end may need to be made
+#def handle_new_post(data):
+#    send(data, broadcast=True)
 
 @app.route("/public/favicon.ico", methods=["GET"])
 def icon():
@@ -225,6 +231,7 @@ def posts():
             #post = post["message"]
             if post != None and post != "":
                 newPost.create_post(str(username), str(post))
+                # this may havwe to be changed to "emit" function from socket io for messages
             return Response(b"", status=302, headers=[("X-Content-Type-Options", "nosniff"), ("Location", "/")])
 
 
