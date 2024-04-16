@@ -47,16 +47,11 @@ def home():
         posts = PostHandler()
 
         # old_post = soup.find()
-        print(posts.get_all_posts_sorted_by_id)
-        print(posts)
-        profile_pic = "/public/image/image0.png"
         initial_like_counts = {}
         for post in posts.get_all_posts_sorted_by_id():
             post_id = post["post_id"]
             like_count = posts.get_likes(post_id)
             initial_like_counts[post_id] = like_count
-            curr_user = user_login.find_one({"username": post["username"]})
-            profile_pic = curr_user["image"]
 
         # body = soup.prettify("utf-8")
         # response = make_response(body, 200)
@@ -65,7 +60,7 @@ def home():
         # return response
 
         return Response(render_template("/index.html", posts=posts.get_all_posts_sorted_by_id(),
-                                        initial_like_counts=initial_like_counts, user=user, profile_pic=profile_pic), status="200",
+                                        initial_like_counts=initial_like_counts, user=user), status="200",
                         headers=[("X-Content-Type-Options", "nosniff")])
 
 
@@ -225,12 +220,10 @@ def posts():
         else:
             newPost = PostHandler()
             username = user_login.find_one({"authHash": hashToken})
-            username = username['username']
             post = json.loads(request.get_data()).get("message")
-
             #post = post["message"]
             if post != None and post != "":
-                newPost.create_post(str(username), str(post))
+                newPost.create_post(str(username[username["username"]]), str(post), str(username["image"]))
                 # this may havwe to be changed to "emit" function from socket io for messages
             return Response(b"", status=302, headers=[("X-Content-Type-Options", "nosniff"), ("Location", "/")])
 
@@ -281,6 +274,7 @@ def profilePicUpload():
                 return redirect("/authenticate", code=302)
             userDoc = user.checkLoggedIn(request.cookies["authToken"])
             if userDoc:
+                file.seek(0)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], f"image{image_id_collection.count_documents({})}.{fileInfo.extension[0]}"))
                 user_login.update_one({"username": userDoc["username"]}, {"$set": {"image": f"/public/image/image{image_id_collection.count_documents({})}.{fileInfo.extension[0]}"}})
                 image_id_collection.insert_one({"id":image_id_collection.count_documents({})})

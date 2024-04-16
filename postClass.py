@@ -3,18 +3,20 @@ import database
 
 
 class Post:
-    def __init__(self, postID, username, content):
+    def __init__(self, postID, username, content, image):
         self.postID = postID
         self.username = username
         self.content = content
         self.likes = []
+        self.image = image
 
     def save_to_database(self):
         post_dict = {
             "post_id": self.postID,
             "username": self.username,
             "content": self.content,
-            "likes": self.likes
+            "likes": self.likes,
+            "image": self.image
         }
         database.posts_collection.insert_one(post_dict)
 
@@ -41,9 +43,9 @@ class PostHandler:
         self.id_collection.update_one({}, {"$inc": {"id": 1}})
         return post_id
 
-    def create_post(self, username, content):
+    def create_post(self, username, content, image):
         postID = self.generate_post_id()
-        post = Post(postID, username, content)
+        post = Post(postID, username, content, image)
         post.save_to_database()
 
     def get_all_posts(self):
