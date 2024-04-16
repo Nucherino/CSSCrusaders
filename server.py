@@ -1,6 +1,6 @@
 import html, fleep, os, json
 from flask import Flask, request, make_response, redirect, render_template, send_from_directory, Response, jsonify
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 from database import *
 from userClass import *
 import mimetypes, hashlib
@@ -15,7 +15,9 @@ mimetypes.add_type('image/jpg', '.jpg')
 app = Flask(__name__, template_folder='public')
 UPLOAD_FOLDER = '/public/image'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-socketio = SocketIO(app)
+socketio = SocketIO(app,debug=True)
+
+username = ""
 
 # * -------------------------- GET REQUESTS ------------------------------
 
@@ -36,6 +38,10 @@ def home():
 
         name = find_user.get("username")
         user = name
+
+        global username
+        username = name
+
         posts = PostHandler()
 
         initial_like_counts = {}
@@ -273,7 +279,26 @@ def profilePicUpload():
         return Response(b"Method Not Allowed", 405,
                         [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
 
+#* ----------------------------- WEBSOCKETS ----------------------------------------------------------------
+
+#* no need for connection list; socketio handles it 
+
+@socketio.on('connect')
+def connect(auth):
+    if username == "":
+        return redirect("/authenticate", code=302)
+    else:
+        #emit('connect', broadcast=True)
+        
+        print("user connected")
+
+@socketio.on('disconnect')
+def disconnect():
+    #emit('disconnect', broadcast=True)
+    print("user disconnected")
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    socketio.run(app, host="0.0.0.0", port=8080)
+    #app.run(host="0.0.0.0", port=8080)
     
 

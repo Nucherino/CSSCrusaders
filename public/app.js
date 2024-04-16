@@ -1,12 +1,30 @@
-const ws = false;
+const ws = true;
 let socket = null;
+
+function initWS(){
+  console.log("HI THERE");
+  socket = io();
+
+  socket.on("connect", () => {
+    console.log("user connected!");
+  })
+
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+  })
+
+  socket.on("message", (ws_message) => {
+    const message = JSON.parse(ws_message.data);
+    const messageType = message.messageType;
+    if(messageType === 'message'){
+      console.log("message sent");
+    }
+  });
+}
 
 function addText () {
   document.getElementById("post-text-box").focus();
   document.getElementById("post-title").innerHTML += "Posts";
-  if(ws){
-    socket = new WebSocket('ws://' + window.location.host + "/websocket");
-  }  
 }
 
 function sendChat () {
@@ -84,3 +102,10 @@ document.querySelectorAll(".post-likes").forEach(like => {
     });
   });
 });
+
+function welcome(){
+  addText();
+  if(ws){
+    initWS();
+  }
+}
