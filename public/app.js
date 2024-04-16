@@ -32,6 +32,33 @@ function sendChat () {
   chatTextBox.focus();
 }
 
+function fetchMessages() {
+    fetch("/get-messages")
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Failed to fetch messages");
+            }
+            return response.json();
+        })
+        .then(messages => {
+            renderMessages(messages);
+        })
+        .catch(error => {
+            console.error("Error fetching messages:", error);
+        });
+    }
+    // Function to render messages in the HTML container
+function renderMessages(messages) {
+    const messagesContainer = document.getElementById("messages-container");
+    messagesContainer.innerHTML = "";
+    messages.forEach(message => {
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("message");
+        messageElement.textContent = message.content;
+        messagesContainer.appendChild(messageElement);
+    });
+}
+document.addEventListener("DOMContentLoaded", fetchMessages);
 function fetchInitialLikeCounts() {
     document.querySelectorAll(".post-likes").forEach(like => {
         const postId = like.parentElement.dataset.postId;

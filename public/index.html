@@ -41,30 +41,56 @@
         <img src="/public/image/readme.jpg" alt="SQUIDWARD" class="squidward" />
       </div>
         <p id="post-title"></p>
-        <div class="posts border-gradient">
-          {% for post in posts %}
-            <div class="list-posts" data-post-id="{{ post.post_id }}" data-username="{{ post.username }}">
-                  <img src="{{ post.image }}" alt="Profile Picture" width="50" height="50">
-                {{ post.username + ': ' + post.content }}
-                <div class="post-likes">
-                    <span class="material-icons">thumb_up</span>
-                    <span class="like-count">{{ initial_like_counts.get(post.post_id, 0) }}</span>
-                </div>
-            </div>
-          {% endfor %}
-          <div class="post-form">
-              <hr>
-              <form name=form onsubmit="sendChat()">
-              <!--<form action="/chat-messages" method="post">-->
+        <div class="posts border-gradient" id="posts-container">
+        </div>
+        <div class="post-form">
+            <hr>
+            <form name=form onsubmit="sendChat()">
                 <input placeholder="Write your post here..." id="post-text-box" type="text" name='post'>
                 <div class="post-button">
-                  <input type="submit" value="Post">
+                    <input type="submit" value="Post">
                 </div>
-              </form>
-          </div>
+            </form>
         </div>
     </div>
   </div>
 <script src="/public/app.js"></script>
+  <script>
+    function fetchMessages() {
+        fetch("/get-messages")
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Failed to fetch messages");
+            }
+            return response.json();
+        })
+        .then(messages => {
+            renderMessages(messages);
+        })
+        .catch(error => {
+            console.error("Error fetching messages:", error);
+        });
+    }
+    // Function to render messages in the HTML container
+    function renderMessages(messages) {
+        const postsContainer = document.getElementById("posts-container");
+        postsContainer.innerHTML = "";
+        messages.forEach(message => {
+            const postElement = document.createElement("div");
+            postElement.classList.add("list-posts");
+            postElement.dataset.postId = message.post_id;
+            postElement.dataset.username = message.username;
+            postElement.innerHTML = `
+                <img src="${message.image}" alt="Profile Picture" width="50" height="50">
+                ${message.username}: ${message.content}
+                <div class="post-likes">
+                    <span class="material-icons">thumb_up</span>
+                    <span class="like-count">${message.likeCount}</span>
+                </div>
+            `;
+            postsContainer.appendChild(postElement);
+        });
+    }
+</script>
 </body>
 </html>
