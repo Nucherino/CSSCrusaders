@@ -49,9 +49,11 @@ def home():
                         headers=[("X-Content-Type-Options", "nosniff")])
 
 
-#@socketio.on('new_post') This may need to be added for posts later on - but alterations to front end may need to be made
-#def handle_new_post(data):
-#    send(data, broadcast=True)
+@app.route("/get-messages", methods=["GET"])
+def get_messages():
+    post_handler = PostHandler()
+    messages = post_handler.get_all_posts()
+    return jsonify(messages)
 
 @app.route("/public/favicon.ico", methods=["GET"])
 def icon():
