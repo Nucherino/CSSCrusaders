@@ -41,15 +41,13 @@
         </div>
         <p id="post-title"></p>
         <div class="posts border-gradient" id="posts-container">
-            <!-- Messages will be dynamically inserted here -->
         </div>
     </div>
 </div>
 
 <script src="/public/app.js"></script>
 <script>
-    // Function to fetch and render messages from the server
-    function fetchAndRenderMessages() {
+    function fetchInitialLikeCountsAndMessages() {
         fetch("/get-messages")
         .then(response => {
             if (!response.ok) {
@@ -58,22 +56,17 @@
             return response.json();
         })
         .then(messages => {
-            // Render messages in the HTML container
             renderMessages(messages);
+            fetchInitialLikeCounts(messages);
         })
         .catch(error => {
             console.error("Error fetching messages:", error);
         });
     }
-
     // Function to render messages in the HTML container
     function renderMessages(messages) {
         const postsContainer = document.getElementById("posts-container");
-
-        // Clear previous messages
         postsContainer.innerHTML = "";
-
-        // Iterate over each message and create HTML elements to display them
         messages.forEach(message => {
             const postElement = document.createElement("div");
             postElement.classList.add("list-posts");
@@ -90,6 +83,26 @@
             postsContainer.appendChild(postElement);
         });
     }
+    function fetchInitialLikeCounts(messages) {
+    messages.forEach(message => {
+        const postId = message.post_id;
+        const likeContainer = document.querySelector(`.post-likes[data-post-id="${postId}"]`);
+        fetch(`/like`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                const counter = likeContainer.querySelector(".like-count");
+                counter.innerText = data.likeCount;
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+    });
+}
 </script>
 </body>
 </html>
