@@ -34,30 +34,15 @@ def home():
         if not find_user:
             return redirect("/authenticate", code=302)
 
-        # with open("public/index.html", "r") as html:
-        #    body = html.read()
-        # soup = BeautifulSoup(body, "html.parser")
-        # old_text = soup.find(id = "username-form")
-        # new_text = old_text.find(text=re.compile("{{user}}")).replace_with(find_user.get("username"))
-
         name = find_user.get("username")
-
         user = name
-
         posts = PostHandler()
 
-        # old_post = soup.find()
         initial_like_counts = {}
         for post in posts.get_all_posts_sorted_by_id():
             post_id = post["post_id"]
             like_count = posts.get_likes(post_id)
             initial_like_counts[post_id] = like_count
-
-        # body = soup.prettify("utf-8")
-        # response = make_response(body, 200)
-        # response.headers.set("X-Content-Type-Options", "nosniff")
-        # response.headers.set("posts", posts=posts.get_all_posts_sorted_by_id)
-        # return response
 
         return Response(render_template("/index.html", posts=posts.get_all_posts_sorted_by_id(),
                                         initial_like_counts=initial_like_counts, user=user), status="200",
@@ -223,7 +208,7 @@ def posts():
             post = json.loads(request.get_data()).get("message")
             #post = post["message"]
             if post != None and post != "":
-                newPost.create_post(str(username[username["username"]]), str(post), str(username["image"]))
+                newPost.create_post(str(username["username"]), str(post), str(username["image"]))
                 # this may havwe to be changed to "emit" function from socket io for messages
             return Response(b"", status=302, headers=[("X-Content-Type-Options", "nosniff"), ("Location", "/")])
 
