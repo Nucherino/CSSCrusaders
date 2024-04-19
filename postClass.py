@@ -6,7 +6,7 @@ class Post:
     def __init__(self, postID, username, content, image):
         self.postID = postID
         self.username = username
-        self.content = content
+        self.content = content.replace("&", "").replace("<", "").replace(">", "")
         self.likes = []
         self.image = image
 
