@@ -288,13 +288,19 @@ def profilePicUpload():
 #* no need for connection list; socketio handles it 
 
 @socketio.on('connect')
-def connect(auth):
-    if username == "":
-        return redirect("/authenticate", code=302)
-    else:
-        #emit('connect', broadcast=True)
-        
+def connect():
+    user = User()
+    user = user.checkLoggedIn(request.cookies.get("authToken"))
+    if user:
+        global username
+        username = user["username"]
+        print(username)
         print("user connected")
+    else:
+        return redirect("/authenticate", code=302)
+   
+        
+        
 
 @socketio.on('disconnect')
 def disconnect():
