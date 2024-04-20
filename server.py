@@ -300,12 +300,30 @@ def connect():
         return redirect("/authenticate", code=302)
    
         
-        
-
 @socketio.on('disconnect')
 def disconnect():
     #emit('disconnect', broadcast=True)
     print("user disconnected")
+
+@socketio.on('message')
+def send_mess(mess):
+
+    curr_user = user_login.find_one({"username": username})
+
+    newPost = PostHandler()
+
+    post = json.loads(mess).get("message")
+
+
+    if post != None and post != "":
+        newPost.create_post(str(username), str(post), str(curr_user["image"]))
+
+        message = posts_collection.find().sort({'_id':-1}).limit(1)
+        message["_id"] = str(message["_id"])
+        m = json.stringify(message)
+        
+    socketio.emit('message', m)
+
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=8080)
