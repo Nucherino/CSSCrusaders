@@ -84,10 +84,6 @@
             postElement.innerHTML = `
                 <img src="${message.image}" alt="Profile Picture" width="50" height="50">
                 ${message.username}: ${message.content}
-                <div class="post-likes">
-                    <span class="material-icons">thumb_up</span>
-                    <span class="like-count">${message.likeCount}</span>
-                </div>
             `;
             postsContainer.appendChild(postElement);
         });
@@ -102,10 +98,6 @@
         postElement.innerHTML = `
             <img src="${message.image}" alt="Profile Picture" width="50" height="50">
             ${message.username}: ${message.content}
-            <div class="post-likes">
-                <span class="material-icons">thumb_up</span>
-                <span class="like-count">${message.likeCount}</span>
-            </div>
         `;
         postsContainer.appendChild(postElement);
     }

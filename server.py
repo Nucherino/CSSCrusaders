@@ -15,9 +15,10 @@ mimetypes.add_type('image/jpg', '.jpg')
 app = Flask(__name__, template_folder='public')
 UPLOAD_FOLDER = '/public/image'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-socketio = SocketIO(app,debug=True)
+socketio = SocketIO(app, debug=True)
 
 username = ""
+
 
 # * -------------------------- GET REQUESTS ------------------------------
 
@@ -36,23 +37,7 @@ def home():
         if not find_user:
             return redirect("/authenticate", code=302)
 
-        name = find_user.get("username")
-        user = name
-
-        global username
-        username = name
-
-        posts = PostHandler()
-
-        initial_like_counts = {}
-        for post in posts.get_all_posts_sorted_by_id():
-            post_id = post["post_id"]
-            like_count = posts.get_likes(post_id)
-            initial_like_counts[post_id] = like_count
-
-        return Response(render_template("/index.html", posts=posts.get_all_posts_sorted_by_id(),
-                                        initial_like_counts=initial_like_counts, user=user), status="200",
-                        headers=[("X-Content-Type-Options", "nosniff")])
+        return Response(render_template("/index.html"), status="200", headers=[("X-Content-Type-Options", "nosniff")])
 
 
 @app.route("/get-messages", methods=["GET"])
@@ -62,6 +47,7 @@ def get_messages():
     for message in messages:
         message["_id"] = str(message["_id"])
     return jsonify(messages)
+
 
 @app.route("/public/favicon.ico", methods=["GET"])
 def icon():
@@ -104,7 +90,6 @@ def styles():
 @app.route("/public/image/<path:imagePath>", methods=["GET"])
 def retrieve_image(imagePath):  # * retrieve images
     return send_from_directory(UPLOAD_FOLDER, imagePath)
-
 
 
 @app.errorhandler(404)
@@ -199,69 +184,17 @@ def handleLogout():
                         [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
 
 
-@app.route("/chat-messages", methods=["POST"])
-def posts():
-    if "authToken" not in request.cookies:
-        return redirect("/authenticate", code=302)
-    else:
-        token = request.cookies["authToken"].encode()
-        h = hashlib.new('sha256')
-        h.update(token)
-        hashToken = h.hexdigest()
-
-        find_user = user_login.find({"authHash": hashToken})
-        if not find_user:
-            return redirect("/authenticate", code=302)
-        else:
-            newPost = PostHandler()
-            username = user_login.find_one({"authHash": hashToken})
-            post = json.loads(request.get_data()).get("message")
-            #post = post["message"]
-            if post != None and post != "":
-                newPost.create_post(str(username["username"]), str(post), str(username["image"]))
-                # this may havwe to be changed to "emit" function from socket io for messages
-            return Response(b"", status=302, headers=[("X-Content-Type-Options", "nosniff"), ("Location", "/")])
-
-
-@app.route("/like", methods=["POST"])
-def like_post():
-    data = request.json
-    postId = int(data.get('postId'))
-    token = request.cookies["authToken"].encode()
-    h = hashlib.new('sha256')
-    h.update(token)
-    hashToken = h.hexdigest()
-    username = user_login.find_one({"authHash": hashToken})
-    username = username['username']
-    print(username)
-    print(postId)
-    post_handler = PostHandler()
-    post = post_handler.collection.find_one({"post_id": postId})
-    print(post)
-    if username in post["likes"]:
-        post_handler.unlike_post(postId, username)
-        liked = False
-    else:
-        post_handler.like_post(postId, username)
-        liked = True
-    updated_like_count = post_handler.get_likes(postId)
-    response_data = {
-        "liked": liked,
-        "likeCount": updated_like_count
-    }
-    return jsonify(response_data)
-
 @app.route("/file-upload", methods=["POST"])
 def profilePicUpload():
     if request.method == "POST":
         if 'file' not in request.files:
             return Response(b"No file", 400,
-                        [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
-        #* allowedExtensions = {'.jpg', '.jpeg', '.jfif', 'pjpeg', 'pjp', 'png', }
+                            [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
+        # * allowedExtensions = {'.jpg', '.jpeg', '.jfif', 'pjpeg', 'pjp', 'png', }
         file = request.files['file']
         if file.filename == '':
             return Response(b"No selected file", 400,
-                        [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
+                            [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
         fileInfo = fleep.get(file.stream.read())
         if file and fileInfo.type_matches('raster-image'):
             user = User()
@@ -270,22 +203,26 @@ def profilePicUpload():
             userDoc = user.checkLoggedIn(request.cookies["authToken"])
             if userDoc:
                 file.seek(0)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], f"image{image_id_collection.count_documents({})}.{fileInfo.extension[0]}"))
-                user_login.update_one({"username": userDoc["username"]}, {"$set": {"image": f"/public/image/image{image_id_collection.count_documents({})}.{fileInfo.extension[0]}"}})
-                image_id_collection.insert_one({"id":image_id_collection.count_documents({})})
-                return redirect("/", 302, Response(b"Redirect", 302, [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")]))
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'],
+                                       f"image{image_id_collection.count_documents({})}.{fileInfo.extension[0]}"))
+                user_login.update_one({"username": userDoc["username"]}, {"$set": {
+                    "image": f"/public/image/image{image_id_collection.count_documents({})}.{fileInfo.extension[0]}"}})
+                image_id_collection.insert_one({"id": image_id_collection.count_documents({})})
+                return redirect("/", 302, Response(b"Redirect", 302, [("Content-Type", "text/plain"),
+                                                                      ("X-Content-Type-Options", "nosniff")]))
             else:
                 return redirect("/authenticate", code=302)
         else:
             return Response(b"Not image", 400,
-                        [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
+                            [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
     else:
         return Response(b"Method Not Allowed", 405,
                         [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
 
-#* ----------------------------- WEBSOCKETS ----------------------------------------------------------------
 
-#* no need for connection list; socketio handles it 
+# * ----------------------------- WEBSOCKETS ----------------------------------------------------------------
+
+# * no need for connection list; socketio handles it
 
 @socketio.on('connect')
 def connect():
@@ -298,35 +235,28 @@ def connect():
         print("user connected")
     else:
         return redirect("/authenticate", code=302)
-   
-        
+
+
 @socketio.on('disconnect')
 def disconnect():
-    #emit('disconnect', broadcast=True)
+    # emit('disconnect', broadcast=True)
     print("user disconnected")
+
 
 @socketio.on('message')
 def send_mess(mess):
-
     curr_user = user_login.find_one({"username": username})
-
     newPost = PostHandler()
-
     post = json.loads(mess).get("message")
-
-
     if post != None and post != "":
         newPost.create_post(str(username), str(post), str(curr_user["image"]))
-
-        message = posts_collection.find().sort({'_id':-1}).limit(1)
+        message = posts_collection.find_one(sort=[('_id', -1)])
         message["_id"] = str(message["_id"])
-        m = json.stringify(message)
-        
-    socketio.emit('message', m)
+        print(message)
+
+    socketio.emit('message', message)
 
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=8080)
-    #app.run(host="0.0.0.0", port=8080)
-    
-
+    # app.run(host="0.0.0.0", port=8080)
