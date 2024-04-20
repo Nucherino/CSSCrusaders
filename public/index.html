@@ -92,6 +92,23 @@
             postsContainer.appendChild(postElement);
         });
     }
+    function renderMessage(message) {
+        const postsContainer = document.getElementById("posts-container");
+        postsContainer.innerHTML = "";
+        const postElement = document.createElement("div");
+        postElement.classList.add("list-posts");
+        postElement.dataset.postId = message.post_id;
+        postElement.dataset.username = message.username;
+        postElement.innerHTML = `
+            <img src="${message.image}" alt="Profile Picture" width="50" height="50">
+            ${message.username}: ${message.content}
+            <div class="post-likes">
+                <span class="material-icons">thumb_up</span>
+                <span class="like-count">${message.likeCount}</span>
+            </div>
+        `;
+        postsContainer.appendChild(postElement);
+    }
 </script>
 </body>
 </html>

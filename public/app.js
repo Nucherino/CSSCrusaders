@@ -76,6 +76,14 @@ function renderMessages(messages) {
         messagesContainer.appendChild(messageElement);
     });
 }
+function renderMessage(message) {
+        const messageContainer = document.getElementById("posts-container");
+        messageContainer.innerHTML = "";
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("message");
+        messageElement.textContent = message.content;
+        messageContainer.appendChild(messageElement);
+    }
 document.addEventListener("DOMContentLoaded", fetchMessages);
 function fetchInitialLikeCounts() {
     document.querySelectorAll(".post-likes").forEach(like => {
