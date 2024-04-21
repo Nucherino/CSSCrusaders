@@ -15,14 +15,10 @@ function initWS(){
   })
 
   socket.on("message", (ws_message) => {
-    const message = JSON.parse(ws_message.data);
+    renderMessage(ws_message);
+    const message = ws_message.content;
     console.log("Here is socket.on message: ");
     console.log(message);
-    console.log(ws_message);
-    const messageType = message.messageType;
-    if(messageType === 'message'){
-      console.log("message sent");
-    }
   });
 }
 function sendChat () {
@@ -31,7 +27,7 @@ function sendChat () {
     chatTextBox.value = "";
     if (ws){
         console.log("Sending message over websocket");
-        socket.send(JSON.stringify({"message": message}));
+        socket.emit("message", {"message": message});
     }
     else {
         console.log("Fetching chat messages using get request");
@@ -61,24 +57,35 @@ function fetchMessages() {
             console.error("Error fetching messages:", error);
         });
 }
-    // Function to render messages in the HTML container
+
+// Function to render messages in the HTML container
 function renderMessages(messages) {
-    const messagesContainer = document.getElementById("messages-container");
-    messagesContainer.innerHTML = "";
-    messages.forEach(message => {
-        const messageElement = document.createElement("div");
-        messageElement.classList.add("message");
-        messageElement.textContent = message.content;
-        messagesContainer.appendChild(messageElement);
-    });
+  const postsContainer = document.getElementById("posts-container");
+  postsContainer.innerHTML = "";
+  messages.forEach(message => {
+      const postElement = document.createElement("div");
+      postElement.classList.add("list-posts");
+      postElement.dataset.postId = message.post_id;
+      postElement.dataset.username = message.username;
+      postElement.innerHTML = `
+          <img src="${message.image}" alt="Profile Picture" width="50" height="50">
+          ${message.username}: ${message.content}`;
+      postsContainer.appendChild(postElement);
+      postsContainer.scrollTop = postsContainer.scrollHeight;
+  });
 }
+
 function renderMessage(message) {
-        const messageContainer = document.getElementById("posts-container");
-        messageContainer.innerHTML = "";
-        const messageElement = document.createElement("div");
-        messageElement.classList.add("message");
-        messageElement.textContent = message.content;
-        messageContainer.appendChild(messageElement);
+  const postsContainer = document.getElementById("posts-container");
+  const postElement = document.createElement("div");
+  postElement.classList.add("list-posts");
+  postElement.dataset.postId = message.post_id;
+  postElement.dataset.username = message.username;
+  postElement.innerHTML = `
+      <img src="${message.image}" alt="Profile Picture" width="50" height="50">
+      ${message.username}: ${message.content}`;
+  postsContainer.appendChild(postElement);
+  postsContainer.scrollTop = postsContainer.scrollHeight;
 }
 
 function welcome(){

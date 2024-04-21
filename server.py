@@ -43,7 +43,7 @@ def home():
 @app.route("/get-messages", methods=["GET"])
 def get_messages():
     post_handler = PostHandler()
-    messages = post_handler.get_all_posts_sorted_by_id()
+    messages = post_handler.get_all_posts()
     for message in messages:
         message["_id"] = str(message["_id"])
     return jsonify(messages)
@@ -242,6 +242,7 @@ def disconnect():
     # emit('disconnect', broadcast=True)
     global connections
     print(f"{connections[request.sid]} disconnected")
+    del connections[request.sid]
 
 
 @socketio.on('message')
@@ -249,14 +250,15 @@ def send_mess(mess):
     username = connections[request.sid]
     curr_user = user_login.find_one({"username": username})
     newPost = PostHandler()
-    post = json.loads(mess).get("message")
+    post = mess.get("message")
     if post != None and post != "":
         newPost.create_post(str(username), str(post), str(curr_user["image"]))
-        message = posts_collection.find_one(sort=[('_id', -1)])
+        message = posts_collection.find_one(sort=[('_id', -1)]) #* very cursed
         message["_id"] = str(message["_id"])
         print(message)
 
-    socketio.emit('message', message)
+        sentMessage = {'post_id': message["post_id"], 'username': message["username"], 'content': message["content"], 'likes': message['likes'], 'image': message['image']}
+        socketio.emit("message", sentMessage)
 
 
 if __name__ == "__main__":

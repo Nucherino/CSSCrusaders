@@ -47,7 +47,7 @@ body {
   display: flex;
   height: 60%;
   width: 90%;
-  flex-direction: column-reverse;
+  flex-direction: column;
 }
 
 #post-text-box {
