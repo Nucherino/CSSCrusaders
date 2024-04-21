@@ -17,7 +17,7 @@ UPLOAD_FOLDER = '/public/image'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 socketio = SocketIO(app, debug=True)
 
-username = ""
+connections = {}
 
 
 # * -------------------------- GET REQUESTS ------------------------------
@@ -43,7 +43,7 @@ def home():
 @app.route("/get-messages", methods=["GET"])
 def get_messages():
     post_handler = PostHandler()
-    messages = post_handler.get_all_posts()
+    messages = post_handler.get_all_posts_sorted_by_id()
     for message in messages:
         message["_id"] = str(message["_id"])
     return jsonify(messages)
@@ -229,10 +229,10 @@ def connect():
     user = User()
     user = user.checkLoggedIn(request.cookies.get("authToken"))
     if user:
-        global username
+        global connections
+        connections[request.sid] = user["username"]
         username = user["username"]
-        print(username)
-        print("user connected")
+        print(f"{username} connected")
     else:
         return redirect("/authenticate", code=302)
 
@@ -240,11 +240,13 @@ def connect():
 @socketio.on('disconnect')
 def disconnect():
     # emit('disconnect', broadcast=True)
-    print("user disconnected")
+    global connections
+    print(f"{connections[request.sid]} disconnected")
 
 
 @socketio.on('message')
 def send_mess(mess):
+    username = connections[request.sid]
     curr_user = user_login.find_one({"username": username})
     newPost = PostHandler()
     post = json.loads(mess).get("message")
