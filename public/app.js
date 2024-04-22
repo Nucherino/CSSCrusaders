@@ -8,7 +8,7 @@ function addText () {
 
 function initWS(){
   console.log("HI THERE");
-  socket = io("wss://csscrusaders.com", {
+  socket = io("https://csscrusaders.com", {
     //path: "/",
     cors: {
       origin: "https://csscrusaders.com",
