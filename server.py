@@ -48,6 +48,7 @@ def get_messages():
     messages = post_handler.get_all_posts()
     for message in messages:
         message["_id"] = str(message["_id"])
+        message['likeCount'] = len(message['likes'])
     return jsonify(messages)
 
 
