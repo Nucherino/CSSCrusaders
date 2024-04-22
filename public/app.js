@@ -8,7 +8,7 @@ function addText () {
 
 function initWS(){
   console.log("HI THERE");
-  socket = io('https://csscrusaders.com', {
+  socket = io('https://localhost', {
     transports: ["websocket"]
   });
   console.log(socket);
