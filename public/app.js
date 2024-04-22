@@ -9,6 +9,7 @@ function addText () {
 function initWS(){
   console.log("HI THERE");
   socket = io("csscrusaders.com", {
+    path: "/",
     transports: ["websocket", "polling"]
   });
   console.log(socket);
