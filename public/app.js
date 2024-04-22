@@ -9,7 +9,7 @@ function addText () {
 function initWS(){
   console.log("HI THERE");
   socket = io("csscrusaders.com", {
-    transports: ["websocket"]
+    transports: ["websocket", "polling"]
   });
   console.log(socket);
 
