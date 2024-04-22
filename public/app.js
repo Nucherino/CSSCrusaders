@@ -10,6 +10,10 @@ function initWS(){
   console.log("HI THERE");
   socket = io("wss://csscrusaders.com", {
     //path: "/",
+    cors: {
+      origin: "https://csscrusaders.com",
+      methods: ["GET", "POST"]
+    }, 
     transports: ["websocket", "polling"]
   });
   console.log(socket);
