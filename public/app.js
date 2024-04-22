@@ -8,7 +8,7 @@ function addText () {
 
 function initWS(){
   console.log("HI THERE");
-  socket = io("csscrusaders.com", {
+  socket = io("https://csscrusaders.com", {
     path: "/",
     transports: ["websocket", "polling"]
   });
@@ -32,7 +32,7 @@ function initWS(){
   socket.on("like", (likeData) => {
     updateLikes(likeData);
     console.log("user liked message");
-  })
+  });
 
   socket.on("connect_error", (err) => {
     // the reason of the error, for example "xhr poll error"
