@@ -8,7 +8,7 @@ function addText () {
 
 function initWS(){
   console.log("HI THERE");
-  socket = io();
+  socket = io('https://localhost');
   console.log(socket);
 
   socket.on("connect", () => {
