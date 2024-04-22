@@ -290,9 +290,23 @@ def send_mess(mess):
         print(message)
 
         sentMessage = {'post_id': message["post_id"], 'username': message["username"], 'content': message["content"], 'likes': message['likes'], 'likeCount': len(message['likes']), 'image': message['image']}
-        print('likeCount')
         socketio.emit("message", sentMessage)
 
+@socketio.on('like')
+def like_post_websockets(postDict):
+    postId = postDict.get("postId")
+    post_handler = PostHandler()
+    post = post_handler.collection.find_one({"post_id": postId})
+    username = connections[request.sid]
+
+    if username in post["likes"]:
+        post_handler.unlike_post(postId, username)
+        liked = False
+    else:
+        post_handler.like_post(postId, username)
+        liked = True
+    updated_like_count = post_handler.get_likes(postId)
+    socketio.emit("like", {'liked': liked, 'likeCount': updated_like_count, 'postId': postId})
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=8080)

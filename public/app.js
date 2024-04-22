@@ -4,9 +4,6 @@ let socket = null;
 function addText () {
   document.getElementById("post-text-box").focus();
   document.getElementById("post-title").innerHTML += "Posts";
-  if(ws){
-    socket = new WebSocket('ws://' + window.location.host + "/websocket");
-  }
 }
 
 function initWS(){
@@ -28,7 +25,28 @@ function initWS(){
     console.log("Here is socket.on message: ");
     console.log(message);
   });
+
+  socket.on("like", (likeData) => {
+    updateLikes(likeData);
+    console.log("user liked message");
+  })
 }
+
+function updateLikes(likeData) {
+  postID = likeData.postId;
+  liked = likeData.liked;
+
+  counter = document.getElementById(`${postID}_like_count`);
+  counter.innerText = likeData.likeCount;
+}
+
+function likeClicked(postId){
+  if(ws){
+    console.log("like button clicked");
+    socket.emit("like", {"postId": postId});
+  } 
+}
+
 function sendChat () {
     const chatTextBox = document.getElementById('post-text-box');
     const message = chatTextBox.value;
@@ -79,8 +97,8 @@ function renderMessages(messages) {
           <img src="${message.image}" alt="Profile Picture" width="50" height="50">
           ${message.username}: ${message.content}
           <div class="post-likes">
-            <span class="material-icons">thumb_up</span>
-            <span class="like-count">${message.likeCount}</span>
+            <span id="${message.post_id}_like_button" class="material-icons" onclick='likeClicked(${message.post_id}); return false;'>thumb_up</span>
+            <span id="${message.post_id}_like_count" class="like-count">${message.likeCount}</span>
           </div>
       `;
       postsContainer.appendChild(postElement);
@@ -98,8 +116,8 @@ function renderMessage(message) {
       <img src="${message.image}" alt="Profile Picture" width="50" height="50">
       ${message.username}: ${message.content}
       <div class="post-likes">
-            <span class="material-icons">thumb_up</span>
-            <span class="like-count">${message.likeCount}</span>
+            <span id="${message.post_id}_like_button" class="material-icons" onclick='likeClicked(${message.post_id}); return false;'>thumb_up</span>
+            <span id="${message.post_id}_like_count" class="like-count">${message.likeCount}</span>
       </div>
   `;
   postsContainer.appendChild(postElement);
@@ -113,36 +131,3 @@ function welcome(){
         initWS();
     }
 }
-
-document.querySelectorAll(".post-likes").forEach(like => {
-  like.addEventListener("click", function() {
-    const postId = this.parentElement.dataset.postId;
-    const counter = this.querySelector(".like-count");
-    const isLiked = this.classList.contains("liked");
-    const username = this.parentElement.dataset.username;
-    fetch("/like", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ postId: postId, username: username })
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data.liked) {
-        like.classList.add("liked");
-      } else {
-        like.classList.remove("liked");
-      }
-      counter.innerText = data.likeCount;
-    })
-    .catch(error => {
-      console.error("Error:", error);
-    });
-  });
-});
