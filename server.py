@@ -37,7 +37,9 @@ def home():
         if not find_user:
             return redirect("/authenticate", code=302)
 
-        return Response(render_template("/index.html"), status="200", headers=[("X-Content-Type-Options", "nosniff")])
+        username = find_user.get("username")
+
+        return Response(render_template("/index.html", user=username), status="200", headers=[("X-Content-Type-Options", "nosniff")])
 
 
 @app.route("/get-messages", methods=["GET"])
@@ -220,6 +222,35 @@ def profilePicUpload():
                         [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
 
 
+@app.route("/like", methods=["POST"])
+def like_post():
+    data = request.json
+    postId = int(data.get('postId'))
+    token = request.cookies["authToken"].encode()
+    h = hashlib.new('sha256')
+    h.update(token)
+    hashToken = h.hexdigest()
+    username = user_login.find_one({"authHash": hashToken})
+    username = username['username']
+    print(username)
+    print(postId)
+    post_handler = PostHandler()
+    post = post_handler.collection.find_one({"post_id": postId})
+    print(post)
+    if username in post["likes"]:
+        post_handler.unlike_post(postId, username)
+        liked = False
+    else:
+        post_handler.like_post(postId, username)
+        liked = True
+    updated_like_count = post_handler.get_likes(postId)
+    response_data = {
+        "liked": liked,
+        "likeCount": updated_like_count
+    }
+    return jsonify(response_data)
+
+
 # * ----------------------------- WEBSOCKETS ----------------------------------------------------------------
 
 # * no need for connection list; socketio handles it
@@ -257,7 +288,8 @@ def send_mess(mess):
         message["_id"] = str(message["_id"])
         print(message)
 
-        sentMessage = {'post_id': message["post_id"], 'username': message["username"], 'content': message["content"], 'likes': message['likes'], 'image': message['image']}
+        sentMessage = {'post_id': message["post_id"], 'username': message["username"], 'content': message["content"], 'likes': message['likes'], 'likeCount': len(message['likes']), 'image': message['image']}
+        print('likeCount')
         socketio.emit("message", sentMessage)
 
 

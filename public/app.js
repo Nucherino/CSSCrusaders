@@ -1,6 +1,14 @@
 const ws = true;
 let socket = null;
 
+function addText () {
+  document.getElementById("post-text-box").focus();
+  document.getElementById("post-title").innerHTML += "Posts";
+  if(ws){
+    socket = new WebSocket('ws://' + window.location.host + "/websocket");
+  }
+}
+
 function initWS(){
   console.log("HI THERE");
   socket = io();
@@ -69,7 +77,12 @@ function renderMessages(messages) {
       postElement.dataset.username = message.username;
       postElement.innerHTML = `
           <img src="${message.image}" alt="Profile Picture" width="50" height="50">
-          ${message.username}: ${message.content}`;
+          ${message.username}: ${message.content}
+          <div class="post-likes">
+            <span class="material-icons">thumb_up</span>
+            <span class="like-count">${message.likeCount}</span>
+          </div>
+      `;
       postsContainer.appendChild(postElement);
       postsContainer.scrollTop = postsContainer.scrollHeight;
   });
@@ -83,14 +96,53 @@ function renderMessage(message) {
   postElement.dataset.username = message.username;
   postElement.innerHTML = `
       <img src="${message.image}" alt="Profile Picture" width="50" height="50">
-      ${message.username}: ${message.content}`;
+      ${message.username}: ${message.content}
+      <div class="post-likes">
+            <span class="material-icons">thumb_up</span>
+            <span class="like-count">${message.likeCount}</span>
+      </div>
+  `;
   postsContainer.appendChild(postElement);
   postsContainer.scrollTop = postsContainer.scrollHeight;
 }
 
 function welcome(){
-  fetchMessages();
-  if(ws){
-    initWS();
-  }
+    addText();
+    fetchMessages();
+    if(ws){
+        initWS();
+    }
 }
+
+document.querySelectorAll(".post-likes").forEach(like => {
+  like.addEventListener("click", function() {
+    const postId = this.parentElement.dataset.postId;
+    const counter = this.querySelector(".like-count");
+    const isLiked = this.classList.contains("liked");
+    const username = this.parentElement.dataset.username;
+    fetch("/like", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ postId: postId, username: username })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.liked) {
+        like.classList.add("liked");
+      } else {
+        like.classList.remove("liked");
+      }
+      counter.innerText = data.likeCount;
+    })
+    .catch(error => {
+      console.error("Error:", error);
+    });
+  });
+});
