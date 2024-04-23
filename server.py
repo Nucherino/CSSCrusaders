@@ -15,7 +15,7 @@ mimetypes.add_type('image/jpg', '.jpg')
 app = Flask(__name__, template_folder='public')
 UPLOAD_FOLDER = '/public/image'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-socketio = SocketIO(app, debug=True)
+socketio = SocketIO(app, debug=True, cors_allowed_origins="https://csscrusaders.com")
 
 connections = {}
 
