@@ -8,11 +8,10 @@ function addText () {
 
 function initWS(){
   console.log("HI THERE");
-  socket = io("https://localhost:8080");
-    /*{
+  socket = io("https://localhost:8080", {
     //path: "/",
     transports: ["websocket", "polling"]
-  });*/
+  });
   console.log(socket);
 
   socket.on("connect", () => {
