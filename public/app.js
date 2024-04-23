@@ -10,7 +10,7 @@ function initWS(){
   console.log("HI THERE");
   socket = io("https://csscrusaders.com", {
     //path: "/",
-    transports: ["websocket", "polling"]
+    transports: ["websocket"]
   });
   console.log(socket);
 
