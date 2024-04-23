@@ -8,10 +8,11 @@ function addText () {
 
 function initWS(){
   console.log("HI THERE");
-  socket = io("https://csscrusaders.com", {
+  socket = io();
+    /*{
     //path: "/",
     transports: ["websocket", "polling"]
-  });
+  });*/
   console.log(socket);
 
   socket.on("connect", () => {
