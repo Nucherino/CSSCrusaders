@@ -40,18 +40,20 @@
       <div class="image_div">
         <img src="/public/image/readme.jpg" alt="SQUIDWARD" class="squidward" />
       </div>
-        <p id="post-title"></p>
-        <div class="posts border-gradient" id="posts-container">
-        </div>
-        <div class="post-form">
-            <hr>
-            <form name='form' onsubmit="sendChat(); return false;">
-                <input placeholder="Write your post here..." id="post-text-box" type="text" name='post'>
-                <div class="post-button">
-                    <input type="submit" value="Post">
-                </div>
-            </form>
-        </div>
+      <p id="post-title"></p>
+      <div class="posts border-gradient" id="posts-container">
+      </div>
+      <div class="post-form">
+          <hr>
+          <form name='form' onsubmit="sendChat(); return false;">
+              <input placeholder="Write your post here..." id="post-text-box" type="text" name='post'>
+              <br />
+              <input placeholder="Write number of seconds to delay sending message" id="post-delay-box" type="text" name="post"> 
+              <div class="post-button">
+                  <input type="submit" value="Post">
+              </div>
+          </form>
+      </div>
     </div>
   </div>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>

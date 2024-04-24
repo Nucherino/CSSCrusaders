@@ -53,7 +53,11 @@ body {
 #post-text-box {
   width: 90%;
   padding: 20px;
-  bottom: 0;
+}
+
+#post-delay-box {
+  width: 30%;
+  margin-top: 10px;
 }
 
 .post-button {

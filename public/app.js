@@ -8,6 +8,8 @@ function addText () {
 
 function initWS(){
   console.log("HI THERE");
+
+  //* comment this out on deployment 
   socket = io("https://csscrusaders.com", {
     //path: "/",
     transports: ["websocket"]
@@ -34,6 +36,30 @@ function initWS(){
     console.log("user liked message");
   });
 
+  socket.on("counter", (ws_counter) => {
+    const secondsLeft = ws_counter.counter;
+    const message = ws_counter.message;
+
+    const element = document.getElementById(`${message.post_id}_delayed_post`);
+
+    if(element === undefined) {
+      const main = document.getElementById('main-div');
+
+      const postElement = document.createElement("div");
+      postElement.id = `${message.post_id}_delayed_post`;
+      postElement.dataset.postId = message.post_id;
+      postElement.innerHTML = `${message.username}: ${message.content}`;
+
+      const postTimer = document.createElement("p");
+      postTimer.id = `${message.post_id}_timer`;
+
+      postElement.appendChild(postTimer);
+      main.appendChild(postElement);
+    } 
+
+    updateCounter(ws_counter.message, secondsLeft);
+  })
+
   socket.on("connect_error", (err) => {
     // the reason of the error, for example "xhr poll error"
     console.log(err.message);
@@ -44,6 +70,19 @@ function initWS(){
     // some additional context, for example the XMLHttpRequest object
     console.log(err.context);
   });
+}
+
+function updateCounter(message, secondsLeft){
+  const messageID = message.post_id;
+  const element = document.getElementById(`${messageID}_delayed_post`);
+  const timer = document.getElementById(`${messageID}_timer`);
+  if(secondsLeft === 0){
+    element.remove();
+  } else if (secondsLeft === 1) { 
+    timer.innerText = `Sends in ${secondsLeft} second`;
+  } else {
+    timer.innerText = `Sends in ${secondsLeft} seconds`;
+  }
 }
 
 function updateLikes(likeData) {
@@ -65,9 +104,21 @@ function sendChat () {
     const chatTextBox = document.getElementById('post-text-box');
     const message = chatTextBox.value;
     chatTextBox.value = "";
+
+    const delayBox = document.getElementById('post-delay-box');
+    let delay = 0;
+
+    try {
+      delay = Number(delayBox.value);
+    } catch (error) {
+      delay = 0;
+    }
+    
+    delayBox.value = "";
+
     if (ws){
         console.log("Sending message over websocket");
-        socket.emit("message", {"message": message});
+        socket.emit("message", {"message": message, 'delay':delay});
     }
     else {
         console.log("Fetching chat messages using get request");
