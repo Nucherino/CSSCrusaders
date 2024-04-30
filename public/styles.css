@@ -67,7 +67,7 @@ body {
 }
 
 h1 {
-  padding-left: 42%
+  padding-left: 48%
 }
 
 .title{
@@ -117,4 +117,25 @@ hr {
   border-radius: 25px;
   height: 75%;
   background-color: #dee7e8;
+}
+
+.main-div .profile-table {
+  text-align: right;
+  padding-left: 37%;
+}
+
+td {
+  width: 150px;
+}
+
+tr {
+  height: 50px;
+}
+.profile-pic {
+  padding: 50px;
+}
+
+.right-table {
+  text-align: left;
+  padding-left: 50px;
 }
