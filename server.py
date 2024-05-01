@@ -5,6 +5,8 @@ from database import *
 from userClass import *
 import mimetypes, hashlib
 from postClass import PostHandler
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 mimetypes.add_type('text/css', '.css')
 mimetypes.add_type('text/javascript', '.js')
@@ -16,6 +18,13 @@ app = Flask(__name__, template_folder='public')
 UPLOAD_FOLDER = '/public/image'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 socketio = SocketIO(app, debug=True, cors_allowed_origins="https://csscrusaders.com")
+
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["50 per 10 seconds"],
+    storage_uri="memory://"
+)
 
 connections = {}
 
