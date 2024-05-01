@@ -26,12 +26,10 @@ limiter = Limiter(
     get_remote_address,
     app=app,
     meta_limits=["1 per 30 seconds"],
-    default_limits=["50 per 10 seconds"],
-    storage_uri="mongodb://"
+    default_limits=["50 per 10 seconds"]
 )
 
 connections = {}
-
 
 # * -------------------------- GET REQUESTS ------------------------------
 
