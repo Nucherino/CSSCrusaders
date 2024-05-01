@@ -106,14 +106,11 @@ function sendChat () {
     chatTextBox.value = "";
 
     const delayBox = document.getElementById('post-delay-box');
-    let delay = 0;
+    let delay = Number(delayBox.value);
 
-    try {
-      delay = Number(delayBox.value);
-    } catch (error) {
+    if(delay === null){
       delay = 0;
     }
-    
     delayBox.value = "";
 
     if (ws){
