@@ -22,6 +22,10 @@ socketio = SocketIO(app, debug=True, cors_allowed_origins="https://csscrusaders.
 
 # * ----------------------------- TIME OUT SUCKER ----------------------------------
 
+#* jack is debugging
+print(get_remote_address)
+print(request.headers.get("X-Forwarded-For"))
+
 limiter = Limiter(
     get_remote_address,
     app=app,
