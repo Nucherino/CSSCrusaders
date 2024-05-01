@@ -20,16 +20,18 @@ UPLOAD_FOLDER = '/public/image'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 socketio = SocketIO(app, debug=True, cors_allowed_origins="https://csscrusaders.com")
 
+# * ----------------------------- TIME OUT SUCKER ----------------------------------
+
 limiter = Limiter(
     get_remote_address,
     app=app,
     meta_limits=["1 per 30 seconds"],
     default_limits=["50 per 10 seconds"],
-    storage_uri="memory://"
+    storage_uri="mongodb://"
 )
 
 connections = {}
-t_time = {}
+
 
 # * -------------------------- GET REQUESTS ------------------------------
 
@@ -318,15 +320,6 @@ def like_post_websockets(postDict):
         liked = True
     updated_like_count = post_handler.get_likes(postId)
     socketio.emit("like", {'liked': liked, 'likeCount': updated_like_count, 'postId': postId})
-
-# * ----------------------------- TIME OUT SUCKER ----------------------------------
-
-def timeoutTime():
-    if t_time.get(get_remote_address):
-        if time.time() > t_time[get_remote_address]:
-            del t_time[get_remote_address]
-    else:
-        t_time[get_remote_address] = time.time() + 30
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=8080)
