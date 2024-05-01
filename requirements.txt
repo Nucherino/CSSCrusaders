@@ -4,3 +4,4 @@ Flask~=2.3.3
 passlib~=1.7.4
 fleep
 flask-socketio~=5.1.1
+flask-limiter
