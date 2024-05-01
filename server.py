@@ -23,10 +23,10 @@ socketio = SocketIO(app, debug=True, cors_allowed_origins="https://csscrusaders.
 # * ----------------------------- TIME OUT SUCKER ----------------------------------
 
 #* jack is debugging
-print(get_remote_address)
+print(get_remote_address())
 
 limiter = Limiter(
-    get_remote_address,
+    get_remote_address(),
     app=app,
     meta_limits=["1 per 30 seconds"],
     default_limits=["50 per 10 seconds"]
