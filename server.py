@@ -1,4 +1,4 @@
-import html, fleep, os, json
+import fleep, os
 from flask import Flask, request, make_response, redirect, render_template, send_from_directory, Response, jsonify
 from flask_socketio import SocketIO, emit
 from database import *
@@ -7,6 +7,7 @@ import mimetypes, hashlib
 from postClass import PostHandler
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+import time
 
 mimetypes.add_type('text/css', '.css')
 mimetypes.add_type('text/javascript', '.js')
@@ -22,12 +23,13 @@ socketio = SocketIO(app, debug=True, cors_allowed_origins="https://csscrusaders.
 limiter = Limiter(
     get_remote_address,
     app=app,
+    meta_limits=["1 per 30 seconds"],
     default_limits=["50 per 10 seconds"],
     storage_uri="memory://"
 )
 
 connections = {}
-
+t_time = {}
 
 # * -------------------------- GET REQUESTS ------------------------------
 
@@ -316,6 +318,15 @@ def like_post_websockets(postDict):
         liked = True
     updated_like_count = post_handler.get_likes(postId)
     socketio.emit("like", {'liked': liked, 'likeCount': updated_like_count, 'postId': postId})
+
+# * ----------------------------- TIME OUT SUCKER ----------------------------------
+
+def timeoutTime():
+    if t_time.get(get_remote_address):
+        if time.time() > t_time[get_remote_address]:
+            del t_time[get_remote_address]
+    else:
+        t_time[get_remote_address] = time.time() + 30
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=8080)
