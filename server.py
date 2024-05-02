@@ -7,6 +7,7 @@ import mimetypes, hashlib
 from postClass import PostHandler
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from werkzeug.middleware.proxy_fix import ProxyFix
 import time
 
 mimetypes.add_type('text/css', '.css')
@@ -18,21 +19,32 @@ mimetypes.add_type('image/jpg', '.jpg')
 app = Flask(__name__, template_folder='public')
 UPLOAD_FOLDER = '/public/image'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
 socketio = SocketIO(app, debug=True, cors_allowed_origins="https://csscrusaders.com")
+
+connections = {}
+t_time = {}
 
 # * ----------------------------- TIME OUT SUCKER ----------------------------------
 
-#* jack is debugging
-print(get_remote_address())
+def timeout_sucker():
+    if t_time.get(get_remote_address()) == None:
+        t_time[get_remote_address()] = time.time() + 30
 
 limiter = Limiter(
-    get_remote_address(),
+    get_remote_address,
     app=app,
     meta_limits=["1 per 30 seconds"],
-    default_limits=["50 per 10 seconds"]
+    default_limits=["50 per 10 seconds"],
+    on_breach=timeout_sucker
 )
 
-connections = {}
+@limiter.exempt
+@app.before_request
+def check_timed_out():
+    if t_time.get(get_remote_address()):
+        if time.time() > t_time[get_remote_address()]:
+            del t_time[get_remote_address()]
 
 # * -------------------------- GET REQUESTS ------------------------------
 
