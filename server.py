@@ -27,27 +27,16 @@ t_time = {}
 
 # * ----------------------------- TIME OUT SUCKER ----------------------------------
 
-def getSID() -> str:
-    return request.sid
-
-def timeout_sucker():
-    if t_time.get(request.sid) == None:
-        t_time[request.sid] = time.time() + 30
+def getIP() -> str:
+    print(request.headers.get("X-Forwarded-For"))
+    return request.headers.get("X-Forwarded-For")
 
 limiter = Limiter(
-    key_func=getSID,
+    key_func=getIP,
     app=app,
     meta_limits=["1 per 30 seconds"],
     default_limits=["50 per 10 seconds"],
-    on_breach=timeout_sucker
 )
-
-@limiter.exempt
-@app.before_request
-def check_timed_out():
-    if t_time.get(request.sid):
-        if time.time() > t_time[request.sid]:
-            del t_time[request.sid]
 
 # * -------------------------- GET REQUESTS ------------------------------
 
