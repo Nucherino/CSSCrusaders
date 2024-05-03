@@ -139,3 +139,23 @@ tr {
   text-align: left;
   padding-left: 50px;
 }
+
+#edit {
+  width: 40%;
+}
+
+#bio-text-box {
+  width: 100%;
+  text-align: center;
+  height: 50px;
+}
+
+.bio-text {
+  width: 90%;
+  padding-left: 5%;
+}
+
+.home-icon {
+  padding-left: 20px;
+  padding-top: 10px;
+}

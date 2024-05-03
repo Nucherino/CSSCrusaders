@@ -193,3 +193,30 @@ function welcome(){
         initWS();
     }
 }
+
+function isUser() {
+  const curr_user = document.getElementById("username-form").textContent.replace("Your username: ", "");
+  const profile_user = document.getElementById("username").textContent;
+  console.log(curr_user)
+  if (curr_user ==  profile_user) {
+    document.getElementById("edit-button").style.visibility = 'visible';
+  }
+  else {
+    document.getElementById("edit-button").style.visibility = 'hidden';
+  }
+  document.getElementById("save-button").style.visibility = "hidden";
+  document.getElementById('bio-text-box').style.visibility = 'hidden';
+}
+
+function editBio() {
+  document.getElementById('edit-button').style.visibility = 'hidden';
+  document.getElementById('save-button').style.visibility = 'visible';
+  document.getElementById('bio-text-box').style.visibility = 'visible';
+  
+}
+
+function saveBio() {
+  document.getElementById('edit-button').style.visibility = 'visible';
+  document.getElementById('save-button').style.visibility = 'hidden';
+  document.getElementById('bio-text-box').style.visibility = 'hidden';
+}
