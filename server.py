@@ -300,6 +300,7 @@ def disconnect():
 
 @socketio.on('message')
 def send_mess(mess):
+    print(mess)
     username = connections[request.sid]
     curr_user = user_login.find_one({"username": username})
     newPost = PostHandler()
