@@ -25,10 +25,12 @@ socketio = SocketIO(app, debug=True, cors_allowed_origins="https://csscrusaders.
 connections = {}
 t_time = {}
 
+
 # * ----------------------------- TIME OUT SUCKER ----------------------------------
 
 def getIP() -> str:
     return request.headers.get("X-Forwarded-For")
+
 
 limiter = Limiter(
     key_func=getIP,
@@ -36,6 +38,7 @@ limiter = Limiter(
     meta_limits=["1 per 30 seconds"],
     default_limits=["50 per 10 seconds"],
 )
+
 
 # * -------------------------- GET REQUESTS ------------------------------
 
@@ -56,7 +59,8 @@ def home():
 
         username = find_user.get("username")
 
-        return Response(render_template("/index.html", user=username), status="200", headers=[("X-Content-Type-Options", "nosniff")])
+        return Response(render_template("/index.html", user=username), status="200",
+                        headers=[("X-Content-Type-Options", "nosniff")])
 
 
 @app.route("/get-messages", methods=["GET"])
@@ -300,14 +304,19 @@ def send_mess(mess):
     curr_user = user_login.find_one({"username": username})
     newPost = PostHandler()
     post = mess.get("message")
+    delay = mess.get("delay", 0)
     if post != None and post != "":
         newPost.create_post(str(username), str(post), str(curr_user["image"]))
-        message = posts_collection.find_one(sort=[('_id', -1)]) #* very cursed
+        message = posts_collection.find_one(sort=[('_id', -1)])  # * very cursed
         message["_id"] = str(message["_id"])
         print(message)
 
-        sentMessage = {'post_id': message["post_id"], 'username': message["username"], 'content': message["content"], 'likes': message['likes'], 'likeCount': len(message['likes']), 'image': message['image']}
+        sentMessage = {'post_id': message["post_id"], 'username': message["username"], 'content': message["content"],
+                       'likes': message['likes'], 'likeCount': len(message['likes']), 'image': message['image']}
         socketio.emit("message", sentMessage)
+        if delay > 0:
+            update_counter(message["post_id"], delay)
+
 
 @socketio.on('like')
 def like_post_websockets(postDict):
@@ -324,6 +333,15 @@ def like_post_websockets(postDict):
         liked = True
     updated_like_count = post_handler.get_likes(postId)
     socketio.emit("like", {'liked': liked, 'likeCount': updated_like_count, 'postId': postId})
+
+
+def update_counter(post_id, delay):
+    counter = delay
+    while counter > 0:
+        socketio.emit('counter', {'post_id': post_id, 'counter': counter})
+        counter -= 1
+        time.sleep(1)
+
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=8080)
