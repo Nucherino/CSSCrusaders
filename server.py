@@ -27,12 +27,15 @@ t_time = {}
 
 # * ----------------------------- TIME OUT SUCKER ----------------------------------
 
+def getSID() -> str:
+    return request.sid
+
 def timeout_sucker():
-    if t_time.get(get_remote_address()) == None:
-        t_time[get_remote_address()] = time.time() + 30
+    if t_time.get(request.sid) == None:
+        t_time[request.sid] = time.time() + 30
 
 limiter = Limiter(
-    get_remote_address,
+    key_func=getSID,
     app=app,
     meta_limits=["1 per 30 seconds"],
     default_limits=["50 per 10 seconds"],
@@ -42,9 +45,9 @@ limiter = Limiter(
 @limiter.exempt
 @app.before_request
 def check_timed_out():
-    if t_time.get(get_remote_address()):
-        if time.time() > t_time[get_remote_address()]:
-            del t_time[get_remote_address()]
+    if t_time.get(request.sid):
+        if time.time() > t_time[request.sid]:
+            del t_time[request.sid]
 
 # * -------------------------- GET REQUESTS ------------------------------
 
