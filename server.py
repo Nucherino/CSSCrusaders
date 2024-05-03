@@ -313,9 +313,9 @@ def send_mess(mess):
 
         sentMessage = {'post_id': message["post_id"], 'username': message["username"], 'content': message["content"],
                        'likes': message['likes'], 'likeCount': len(message['likes']), 'image': message['image']}
-        socketio.emit("message", sentMessage)
         if delay > 0:
             update_counter(message["post_id"], delay)
+        socketio.emit("message", sentMessage)
 
 
 @socketio.on('like')
@@ -336,10 +336,9 @@ def like_post_websockets(postDict):
 
 
 def update_counter(post_id, delay):
-    counter = delay
-    while counter > 0:
-        socketio.emit('counter', {'post_id': post_id, 'counter': counter})
-        counter -= 1
+    while delay > 0:
+        socketio.emit('counter', {'post_id': post_id, 'counter': delay})
+        delay = delay - 1
         time.sleep(1)
 
 
