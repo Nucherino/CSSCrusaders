@@ -28,7 +28,6 @@ t_time = {}
 # * ----------------------------- TIME OUT SUCKER ----------------------------------
 
 def getIP() -> str:
-    print(request.headers.get("X-Forwarded-For"))
     return request.headers.get("X-Forwarded-For")
 
 limiter = Limiter(
