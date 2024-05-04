@@ -58,7 +58,7 @@ function initWS(){
     } 
 
     console.log(ws_counter.message);
-    console.log(ws_counter.secondsLeft);
+    console.log(secondsLeft);
     updateCounter(ws_counter.message, secondsLeft);
   })
 
