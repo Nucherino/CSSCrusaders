@@ -57,6 +57,8 @@ function initWS(){
       main.appendChild(postElement);
     } 
 
+    console.log(ws_counter.message);
+    console.log(ws_counter.secondsLeft);
     updateCounter(ws_counter.message, secondsLeft);
   })
 
@@ -83,6 +85,7 @@ function updateCounter(message, secondsLeft){
   } else {
     timer.innerText = `Sends in ${String(secondsLeft)} seconds`;
   }
+  console.log(secondsLeft);
 }
 
 function updateLikes(likeData) {
