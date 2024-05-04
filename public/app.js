@@ -78,7 +78,7 @@ function updateCounter(message, secondsLeft){
   const timer = document.getElementById(`${messageID}_timer`);
   if (secondsLeft === 1) { 
     timer.innerText = `Sends in ${String(secondsLeft)} second`;
-    setTimeout(element.remove(), 1000);
+    setTimeout(function(){ element.remove() }, 1000);
   } else {
     timer.innerText = `Sends in ${String(secondsLeft)} seconds`;
   }
