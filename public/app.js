@@ -76,10 +76,9 @@ function updateCounter(message, secondsLeft){
   const messageID = message.post_id;
   const element = document.getElementById(`${messageID}_delayed_post`);
   const timer = document.getElementById(`${messageID}_timer`);
-  if(secondsLeft === 0){
-    element.remove();
-  } else if (secondsLeft === 1) { 
+  if (secondsLeft === 1) { 
     timer.innerText = `Sends in ${String(secondsLeft)} second`;
+    setTimeout(element.remove(), 1000);
   } else {
     timer.innerText = `Sends in ${String(secondsLeft)} seconds`;
   }
