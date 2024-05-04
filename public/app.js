@@ -57,8 +57,6 @@ function initWS(){
       main.appendChild(postElement);
     } 
 
-    console.log(ws_counter.message);
-    console.log(secondsLeft);
     updateCounter(ws_counter.message, secondsLeft);
   })
 
@@ -76,6 +74,7 @@ function initWS(){
 
 function updateCounter(message, secondsLeft){
   const messageID = message.post_id;
+  console.log(secondsLeft);
   const element = document.getElementById(`${messageID}_delayed_post`);
   const timer = document.getElementById(`${messageID}_timer`);
   if(secondsLeft === 0){
@@ -85,7 +84,6 @@ function updateCounter(message, secondsLeft){
   } else {
     timer.innerText = `Sends in ${String(secondsLeft)} seconds`;
   }
-  console.log(secondsLeft);
 }
 
 function updateLikes(likeData) {
