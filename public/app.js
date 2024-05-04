@@ -79,9 +79,9 @@ function updateCounter(message, secondsLeft){
   if(secondsLeft === 0){
     element.remove();
   } else if (secondsLeft === 1) { 
-    timer.innerText = `Sends in ${secondsLeft} second`;
+    timer.innerText = `Sends in ${String(secondsLeft)} second`;
   } else {
-    timer.innerText = `Sends in ${secondsLeft} seconds`;
+    timer.innerText = `Sends in ${String(secondsLeft)} seconds`;
   }
 }
 
