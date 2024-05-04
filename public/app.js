@@ -42,10 +42,8 @@ function initWS(){
 
     const element = document.getElementById(`${message.post_id}_delayed_post`);
 
-    if(element === undefined) {
+    if(element === null) {
       const main = document.getElementById("main-div");
-      console.log(main);
-      console.log("^ checking if it can find main div");
 
       const postElement = document.createElement("div");
       postElement.id = `${message.post_id}_delayed_post`;
@@ -110,7 +108,7 @@ function sendChat () {
     const delayBox = document.getElementById('post-delay-box');
     let delay = Number(delayBox.value);
 
-    if(delay === null){
+    if(delay === NaN){
       delay = 0;
     }
     delayBox.value = "";
