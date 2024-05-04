@@ -43,7 +43,7 @@ function initWS(){
     const element = document.getElementById(`${message.post_id}_delayed_post`);
 
     if(element === null) {
-      const main = document.getElementById("header");
+      const main = document.getElementById("pending-message-container");
 
       const postElement = document.createElement("div");
       postElement.id = `${message.post_id}_delayed_post`;
