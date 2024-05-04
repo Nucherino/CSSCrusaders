@@ -43,7 +43,9 @@ function initWS(){
     const element = document.getElementById(`${message.post_id}_delayed_post`);
 
     if(element === undefined) {
-      const main = document.getElementById('main-div');
+      const main = document.getElementById("main-div");
+      console.log(main);
+      console.log("^ checking if it can find main div");
 
       const postElement = document.createElement("div");
       postElement.id = `${message.post_id}_delayed_post`;
