@@ -43,7 +43,7 @@ limiter = Limiter(
 
 @app.route("/", methods=["GET"])
 @app.route("/public/index.html", methods=["GET"])
-@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope=getIP)
+@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope="")
 def home():
     if "authToken" not in request.cookies:
         return redirect("/authenticate", code=302)
@@ -64,7 +64,7 @@ def home():
 
 
 @app.route("/get-messages", methods=["GET"])
-@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope=getIP)
+@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope="")
 def get_messages():
     post_handler = PostHandler()
     messages = post_handler.get_all_posts()
@@ -75,7 +75,7 @@ def get_messages():
 
 
 @app.route("/public/favicon.ico", methods=["GET"])
-@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope=getIP)
+@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope="")
 def icon():
     with open("/public/favicon.ico", "rb") as file:
         readBytes = file.read()
@@ -84,7 +84,7 @@ def icon():
 
 
 @app.route("/public/app.js", methods=["GET"])
-@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope=getIP)
+@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope="")
 def javascriptCode():
     with open("/public/app.js", "rb") as file:
         readBytes = file.read()
@@ -93,7 +93,7 @@ def javascriptCode():
 
 
 @app.route("/public/authenticate.html", methods=["GET"])
-@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope=getIP)
+@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope="")
 def authenticateHTML():
     with open("/public/authenticate.html", "rb") as file:
         readBytes = file.read()
@@ -102,7 +102,7 @@ def authenticateHTML():
 
 
 @app.route("/authenticate", methods=["GET"])
-@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope=getIP)
+@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope="")
 def authenticate():
     readBytes = render_template("/authenticate.html", error="")
     return make_response((readBytes,
@@ -110,7 +110,7 @@ def authenticate():
 
 
 @app.route("/public/styles.css", methods=["GET"])
-@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope=getIP)
+@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope="")
 def styles():
     with open("/public/styles.css", "rb") as file:
         readBytes = file.read()
@@ -118,13 +118,13 @@ def styles():
 
 
 @app.route("/public/image/<path:imagePath>", methods=["GET"])
-@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope=getIP)
+@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope="")
 def retrieve_image(imagePath):  # * retrieve images
     return send_from_directory(UPLOAD_FOLDER, imagePath)
 
 
 @app.errorhandler(404)
-@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope=getIP)
+@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope="")
 def page_not_found(error):
     return make_response((b"Can't find page", "HTTP/1.1 404 Not Found",
                           [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")]))
@@ -286,7 +286,7 @@ def like_post():
 # * no need for connection list; socketio handles it
 
 @socketio.on('connect')
-@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope=getIP)
+@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope="")
 def connect():
     user = User()
     user = user.checkLoggedIn(request.cookies.get("authToken"))
