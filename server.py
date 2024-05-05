@@ -286,7 +286,7 @@ def like_post():
 # * no need for connection list; socketio handles it
 
 @socketio.on('connect')
-@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP)
+@limiter.shared_limit(limit_value="50/10 seconds", key_func=getIP, scope=getIP)
 def connect():
     user = User()
     user = user.checkLoggedIn(request.cookies.get("authToken"))
