@@ -356,10 +356,16 @@ def saveBio():
             user = user.checkLoggedIn(token)
 
             if user:
-                user_login.update_one({"username": user["username"]}, {"$set": {"bio": request.form.get("bio")}})
-                formatted_string = f"/profile/" + user["username"]
-                return redirect(str(formatted_string), 302, Response(b"Redirect", 302, [("Content-Type", "text/plain"),
-                                                                      ("X-Content-Type-Options", "nosniff")]))
+                bio = request.form.get("bio")
+                if bio:
+                    bio = bio.replace("&", "&amp").replace("<", "&lt").replace(">", "&gt")
+                    user_login.update_one({"username": user["username"]}, {"$set": {"bio": bio}})
+                    formatted_string = f"/profile/" + user["username"]
+                    return redirect(str(formatted_string), 302, Response(b"Redirect", 302, [("Content-Type", "text/plain"),
+                                                                        ("X-Content-Type-Options", "nosniff")]))
+                else:
+                    return make_response((b"No bio", "HTTP/1.1 404 Not Found",
+                          [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")]))
             else:
                 return redirect("/authenticate", code=302)
         else:
