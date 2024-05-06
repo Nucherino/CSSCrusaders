@@ -156,7 +156,7 @@ function renderMessages(messages) {
       postElement.dataset.username = message.username;
       postElement.innerHTML = `
           <img src="${message.image}" alt="Profile Picture" width="50" height="50">
-          ${message.username}: ${message.content}
+          <a href='/profile/${message.username}'>${message.username}</a>: ${message.content}
           <div class="post-likes">
             <span id="${message.post_id}_like_button" class="material-icons" onclick='likeClicked(${message.post_id}); return false;'>thumb_up</span>
             <span id="${message.post_id}_like_count" class="like-count">${message.likeCount}</span>
@@ -175,7 +175,7 @@ function renderMessage(message) {
   postElement.dataset.username = message.username;
   postElement.innerHTML = `
       <img src="${message.image}" alt="Profile Picture" width="50" height="50">
-      ${message.username}: ${message.content}
+      <a href='/profile/${message.username}'>${message.username}</a>: ${message.content}
       <div class="post-likes">
             <span id="${message.post_id}_like_button" class="material-icons" onclick='likeClicked(${message.post_id}); return false;'>thumb_up</span>
             <span id="${message.post_id}_like_count" class="like-count">${message.likeCount}</span>
@@ -191,31 +191,4 @@ function welcome(){
     if(ws){
         initWS();
     }
-}
-
-function isUser() {
-  const curr_user = document.getElementById("username-form").textContent.replace("Your username: ", "");
-  const profile_user = document.getElementById("username").textContent;
-  console.log(curr_user)
-  if (curr_user ==  profile_user) {
-    document.getElementById("edit-button").style.visibility = 'visible';
-  }
-  else {
-    document.getElementById("edit-button").style.visibility = 'hidden';
-  }
-  document.getElementById("save-button").style.visibility = "hidden";
-  document.getElementById('bio-text-box').style.visibility = 'hidden';
-}
-
-function editBio() {
-  document.getElementById('edit-button').style.visibility = 'hidden';
-  document.getElementById('save-button').style.visibility = 'visible';
-  document.getElementById('bio-text-box').style.visibility = 'visible';
-  
-}
-
-function saveBio() {
-  document.getElementById('edit-button').style.visibility = 'visible';
-  document.getElementById('save-button').style.visibility = 'hidden';
-  document.getElementById('bio-text-box').style.visibility = 'hidden';
 }

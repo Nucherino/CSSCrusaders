@@ -35,11 +35,6 @@
       <div class="main-div">
           <h2>Profile</h2>
         <img class="profile-pic" src="{{profile_pic}}" alt="profile image" height="100" width="100">
-        <form action="/file-upload" id="image-message-profile" method="post" enctype="multipart/form-data">
-          <label for="upload-file">Upload an image: </label>
-          <input id="upload-file" type="file" name="file">
-          <input type="submit" value="Save Image">
-        </form>
         <div class="profile-table">
             <table>
               <tbody>
@@ -49,19 +44,12 @@
                   </tr>
                   <tr>
                     <td>Bio:</td>
+                    <td class="right-table" id="bio">{{bio}}</td>
                 </tr>
                 <br />
               </tbody>
           </table>
         </div>
-        <div class = "bio-text">
-            <form name='bio' action="/save-bio" method="post" enctype="application/x-www-form-urlencoded">
-                <input placeholder="Enter new bio..." id="bio-text-box" type="text" name='post' value="{{bio}}">
-                <div id="save-button">
-                    <input type="submit" value="Save">
-                </div>
-            </form>
-          </div>
       </div>
     </div>
   </body>
