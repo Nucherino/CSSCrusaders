@@ -272,6 +272,22 @@ def like_post():
     }
     return jsonify(response_data)
 
+@app.route("/save-bio", methods=["POST"])
+def saveBio():
+    if request.method == "POST":
+        token = request.cookies.get("authToken")
+        if token:
+            user = User()
+            user = user.checkLoggedIn(token)
+
+            if user:
+                user_login.update_one({"username": user["username"]}, {"$set": {"bio": request.files.get("bio")}})
+                return Response(b"Bio Saved", "200 OK",
+                                [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
+            else:
+                return redirect("/authenticate", code=302)
+        else:
+            return redirect("/authenticate", code=302)
 
 # * ----------------------------- WEBSOCKETS ----------------------------------------------------------------
 
