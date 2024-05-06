@@ -359,7 +359,7 @@ def saveBio():
             user = user.checkLoggedIn(token)
 
             if user:
-                user_login.update_one({"username": user["username"]}, {"$set": {"bio": request.files.get("bio")}})
+                user_login.update_one({"username": user["username"]}, {"$set": {"bio": request.form.get("bio")}})
                 formatted_string = f"/profile/" + user["username"]
                 return redirect(str(formatted_string), 302, Response(b"Redirect", 302, [("Content-Type", "text/plain"),
                                                                       ("X-Content-Type-Options", "nosniff")]))
