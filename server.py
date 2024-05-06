@@ -309,7 +309,7 @@ def profilePicUpload():
                     "image": f"/public/image/image{image_id_collection.count_documents({})}.{fileInfo.extension[0]}"}})
                 image_id_collection.insert_one({"id": image_id_collection.count_documents({})})
                 formatted_string = "/profile/" + userDoc["username"]
-                return redirect(str[formatted_string], 302, Response(b"Redirect", 302, [("Content-Type", "text/plain"),
+                return redirect(str(formatted_string), 302, Response(b"Redirect", 302, [("Content-Type", "text/plain"),
                                                                       ("X-Content-Type-Options", "nosniff")]))
             else:
                 return redirect("/authenticate", code=302)
@@ -361,7 +361,7 @@ def saveBio():
             if user:
                 user_login.update_one({"username": user["username"]}, {"$set": {"bio": request.files.get("bio")}})
                 formatted_string = f"/profile/" + user["username"]
-                return redirect(str[formatted_string], 302, Response(b"Redirect", 302, [("Content-Type", "text/plain"),
+                return redirect(str(formatted_string), 302, Response(b"Redirect", 302, [("Content-Type", "text/plain"),
                                                                       ("X-Content-Type-Options", "nosniff")]))
             else:
                 return redirect("/authenticate", code=302)
