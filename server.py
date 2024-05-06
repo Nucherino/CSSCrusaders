@@ -430,7 +430,7 @@ def like_post_websockets(postDict):
 
 def update_counter(message, delay, conn):
     while delay > 0:
-        socketio.send(data={'counter', {'message': message, 'counter': delay}}, json=True, to=conn)
+        socketio.send(data={'counter', {'message': message, 'counter': delay}}, to=conn)
         delay = delay - 1
         time.sleep(1)
 
