@@ -6,8 +6,6 @@ from userClass import *
 import mimetypes, hashlib
 from postClass import PostHandler
 from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-from werkzeug.middleware.proxy_fix import ProxyFix
 import time
 
 mimetypes.add_type('text/css', '.css')
@@ -19,7 +17,6 @@ mimetypes.add_type('image/jpg', '.jpg')
 app = Flask(__name__, template_folder='public')
 UPLOAD_FOLDER = '/public/image'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
 socketio = SocketIO(app, debug=True, cors_allowed_origins="https://csscrusaders.com")
 
 connections = {}
@@ -359,7 +356,7 @@ def saveBio():
             user = user.checkLoggedIn(token)
 
             if user:
-                user_login.update_one({"username": user["username"]}, {"$set": {"bio": request.files.get("bio")}})
+                user_login.update_one({"username": user["username"]}, {"$set": {"bio": request.form.get("bio")}})
                 formatted_string = f"/profile/" + user["username"]
                 return redirect(str(formatted_string), 302, Response(b"Redirect", 302, [("Content-Type", "text/plain"),
                                                                       ("X-Content-Type-Options", "nosniff")]))
