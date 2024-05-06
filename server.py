@@ -134,7 +134,7 @@ def profile(username):
         if token:
             
             if val != None:
-                profile_pic = val["image"]
+                profile_pic = "/" + val["image"]
                 bio = val["bio"]
                 #now it finds the user
                 if username == val["username"]:
@@ -194,7 +194,7 @@ def handleSignUp():
                                 [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
                 # response = make_response((redirect("/", code=302), [("X-Content-Type-Options", "nosniff")]))
             else:
-                user_login.update_one({"username": username}, {"$set": {"image": "public/image/image0.png"}})
+                user_login.update_one({"username": username}, {"$set": {"image": "/public/image/image0.png"}})
                 user_login.update_one({"username": username}, {"$set": {"bio": "No Bio"}})
                 #sets the bio to an empty value on register
                 if image_id_collection.find_one({}) is None:
