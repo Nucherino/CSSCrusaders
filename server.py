@@ -115,6 +115,45 @@ def styles():
 def retrieve_image(imagePath):  # * retrieve images
     return send_from_directory(UPLOAD_FOLDER, imagePath)
 
+@app.route("/profile/<path:username>", methods=["GET"])
+def profile(username):
+    #if username in the path is equal to connections[request.sid]
+
+    user = User()
+    #send them to the editable page
+
+    token = request.cookies.get("authToken")
+    val = user.checkLoggedIn(token)
+    #h = hashlib.new('sha256')
+    #h.update(token)
+    #hashToken = h.hexdigest()
+
+    find_user = user_login.find_one({"username":username})
+
+    if find_user:
+        if token:
+            
+            if val != None:
+                profile_pic = val["image"]
+                bio = val["bio"]
+                #now it finds the user
+                if username == val["username"]:
+                    #set the bio
+
+                    return Response(render_template("/profile.html", user=username, username=username, profile_pic=profile_pic, bio=bio), status="200",
+                                headers=[("X-Content-Type-Options", "nosniff")])
+                else:
+
+                    return Response(render_template("/otherprofile.html", user=val["username"], username=username, profile_pic=profile_pic, bio=bio), status="200",
+                                headers=[("X-Content-Type-Options", "nosniff")])
+
+        else:
+            return redirect("/authenticate", code=302)
+        
+    else:
+        return make_response((b"Can't find user", "HTTP/1.1 404 Not Found",
+                          [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")]))
+
 
 @app.errorhandler(404)
 def page_not_found(error):
@@ -156,6 +195,8 @@ def handleSignUp():
                 # response = make_response((redirect("/", code=302), [("X-Content-Type-Options", "nosniff")]))
             else:
                 user_login.update_one({"username": username}, {"$set": {"image": "public/image/image0.png"}})
+                user_login.update_one({"username": username}, {"$set": {"bio": "No Bio"}})
+                #sets the bio to an empty value on register
                 if image_id_collection.find_one({}) is None:
                     image_id_collection.insert_one({"id": 0})
                 return Response(b"User Registered", "200 OK",
