@@ -134,8 +134,8 @@ def profile(username):
         if token:
             
             if val != None:
-                profile_pic = val["image"]
-                bio = val["bio"]
+                profile_pic = find_user["image"]
+                bio = find_user["bio"]
                 #now it finds the user
                 if username == val["username"]:
                     #set the bio
