@@ -283,6 +283,42 @@ def profilePicUpload():
     else:
         return Response(b"Method Not Allowed", 405,
                         [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
+    
+@app.route("/profile-upload", methods=["POST"])
+def profilePicUpload():
+    if request.method == "POST":
+        if 'file' not in request.files:
+            return Response(b"No file", 400,
+                            [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
+        # * allowedExtensions = {'.jpg', '.jpeg', '.jfif', 'pjpeg', 'pjp', 'png', }
+        file = request.files['file']
+        if file.filename == '':
+            return Response(b"No selected file", 400,
+                            [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
+        fileInfo = fleep.get(file.stream.read())
+        if file and fileInfo.type_matches('raster-image'):
+            user = User()
+            if "authToken" not in request.cookies:
+                return redirect("/authenticate", code=302)
+            userDoc = user.checkLoggedIn(request.cookies["authToken"])
+            if userDoc:
+                file.seek(0)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'],
+                                       f"image{image_id_collection.count_documents({})}.{fileInfo.extension[0]}"))
+                user_login.update_one({"username": userDoc["username"]}, {"$set": {
+                    "image": f"/public/image/image{image_id_collection.count_documents({})}.{fileInfo.extension[0]}"}})
+                image_id_collection.insert_one({"id": image_id_collection.count_documents({})})
+                return redirect(f"/profile/{userDoc["username"]}", 302, Response(b"Redirect", 302, [("Content-Type", "text/plain"),
+                                                                      ("X-Content-Type-Options", "nosniff")]))
+            else:
+                return redirect("/authenticate", code=302)
+        else:
+            return Response(b"Not image", 400,
+                            [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
+    else:
+        return Response(b"Method Not Allowed", 405,
+                        [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
+
 
 
 @app.route("/like", methods=["POST"])
@@ -323,8 +359,8 @@ def saveBio():
 
             if user:
                 user_login.update_one({"username": user["username"]}, {"$set": {"bio": request.files.get("bio")}})
-                return Response(b"Bio Saved", "200 OK",
-                                [("Content-Type", "text/plain"), ("X-Content-Type-Options", "nosniff")])
+                return redirect(f"/profile/{user["username"]}", 302, Response(b"Redirect", 302, [("Content-Type", "text/plain"),
+                                                                      ("X-Content-Type-Options", "nosniff")]))
             else:
                 return redirect("/authenticate", code=302)
         else:
